@@ -1,5 +1,4 @@
 const REPORT_SHEET_NAME = 'Отчет';
-const DASHBOARD_SHEET_NAME = 'Dashboard';
 
 const REPORT_HEADERS = [
   'Группа аналитического учёта', 'Категория товаров', 'Товарная группа 1',

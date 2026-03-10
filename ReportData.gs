@@ -102,6 +102,7 @@ function buildReportRows(c1Data, ordersMap, daysCount) {
     .trim()
     .toLowerCase()
     .replace(/ё/g, 'е')
+    .replace(/[\"'`.,;:!?()[\]{}\-_/]+/g, ' ')
     .replace(/\s+/g, ' ');
 
   const normalizedHeaderMap = c1Headers.reduce((acc, header, idx) => {
