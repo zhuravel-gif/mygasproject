@@ -21,6 +21,9 @@ function formatReportSheet(sheetReport, rowsCount, colsCount) {
 
     sheetReport.getRange(2, REPORT_COLUMNS.turnover, rowsCount - 1, 1).setNumberFormat('0.00');
     sheetReport.getRange(2, REPORT_COLUMNS.articleWb, rowsCount - 1, 1).setNumberFormat('0');
+    sheetReport.getRange(2, REPORT_COLUMNS.oosDate, rowsCount - 1, 1).setNumberFormat('dd.mm.yyyy');
+
+    applyOosConditionalFormatting(sheetReport, rowsCount);
 
     const banding = dataRange.applyRowBanding(SpreadsheetApp.BandingTheme.LIGHT_GREY);
     banding.setHeaderRowColor('#1f4e78');
@@ -30,6 +33,31 @@ function formatReportSheet(sheetReport, rowsCount, colsCount) {
   }
 
   sheetReport.getRange(1, 1, rowsCount, colsCount).createFilter();
+}
+
+
+/**
+ * Добавляет условную подсветку для прогноза OOS: до 7 дней — красный, до 14 дней — желтый.
+ */
+function applyOosConditionalFormatting(sheetReport, rowsCount) {
+  const oosRange = sheetReport.getRange(2, REPORT_COLUMNS.oosDate, rowsCount - 1, 1);
+  const existingRules = sheetReport.getConditionalFormatRules().filter((rule) => {
+    return !rule.getRanges().some((range) => range.getColumn() === REPORT_COLUMNS.oosDate);
+  });
+
+  const redRule = SpreadsheetApp.newConditionalFormatRule()
+    .whenFormulaSatisfied(`=AND($T2<>"",$T2>=TODAY(),$T2<=TODAY()+7)`)
+    .setBackground('#f4cccc')
+    .setRanges([oosRange])
+    .build();
+
+  const yellowRule = SpreadsheetApp.newConditionalFormatRule()
+    .whenFormulaSatisfied(`=AND($T2<>"",$T2>TODAY()+7,$T2<=TODAY()+14)`)
+    .setBackground('#fff2cc')
+    .setRanges([oosRange])
+    .build();
+
+  sheetReport.setConditionalFormatRules(existingRules.concat([redRule, yellowRule]));
 }
 
 /**

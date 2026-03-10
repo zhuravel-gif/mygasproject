@@ -152,6 +152,11 @@ function buildReportRows(c1Data, ordersMap, daysCount) {
     const artWb = row[idxC1.artWb];
     const orderStats = ordersMap.get(artWb) || { fbo: 0, fbs: 0 };
     const totalOrders = orderStats.fbo + orderStats.fbs;
+    const avgDailySales = parseFloat((totalOrders / daysCount).toFixed(2));
+    const coverageDays = Number(row[idxC1.fboRest]) / avgDailySales;
+    const oosDate = avgDailySales > 0
+      ? new Date(Date.now() + Math.round(coverageDays) * 24 * 60 * 60 * 1000)
+      : '';
 
     reportData.push([
       row[idxC1.groupAn],
@@ -172,7 +177,8 @@ function buildReportRows(c1Data, ordersMap, daysCount) {
       orderStats.fbo,
       orderStats.fbs,
       totalOrders,
-      parseFloat((totalOrders / daysCount).toFixed(2))
+      avgDailySales,
+      oosDate
     ]);
   }
 
