@@ -98,11 +98,26 @@ function aggregateOrders(ordersData, timezone) {
  */
 function buildReportRows(c1Data, ordersMap, daysCount) {
   const c1Headers = c1Data[0];
+  const normalizeHeader = (value) => String(value || '')
+    .trim()
+    .toLowerCase()
+    .replace(/ё/g, 'е')
+    .replace(/\s+/g, ' ');
 
-  const getCol = (name) => {
-    const idx = c1Headers.indexOf(name);
-    if (idx === -1) throw new Error(`Колонка "${name}" не найдена на листе 1С.`);
-    return idx;
+  const normalizedHeaderMap = c1Headers.reduce((acc, header, idx) => {
+    acc.set(normalizeHeader(header), idx);
+    return acc;
+  }, new Map());
+
+  const getCol = (nameOrAliases) => {
+    const aliases = Array.isArray(nameOrAliases) ? nameOrAliases : [nameOrAliases];
+
+    for (let i = 0; i < aliases.length; i++) {
+      const idx = normalizedHeaderMap.get(normalizeHeader(aliases[i]));
+      if (idx !== undefined) return idx;
+    }
+
+    throw new Error(`Колонка "${aliases[0]}" не найдена на листе 1С.`);
   };
 
   const idxC1 = {
@@ -110,7 +125,7 @@ function buildReportRows(c1Data, ordersMap, daysCount) {
     art: getCol('Артикул'),
     artWb: getCol('Артикул ВБ'),
     cat: getCol('Категория товаров'),
-    vol: getCol('Объём тары'),
+    vol: getCol(['Объём тары', 'Объем тары']),
     count: getCol('Количество лаков в наборе'),
     ordered: getCol('Заказано поставщику'),
     inProd: getCol('В производстве'),
