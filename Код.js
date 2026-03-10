@@ -33,6 +33,56 @@ function generateWbReport() {
   const ordersData = sheetOrders.getDataRange().getValues();
   const c1Data = sheet1C.getDataRange().getValues();
 
+  const hasNonEmptyHeaders = (headersRow) => {
+    return headersRow.some((cell) => String(cell).trim() !== '');
+  };
+
+  if (ordersData.length < 1) {
+    SpreadsheetApp.getUi().alert('Ошибка: Лист "orders" не содержит даже строку заголовков.');
+    return;
+  }
+
+  if (c1Data.length < 1) {
+    SpreadsheetApp.getUi().alert('Ошибка: Лист "1C" не содержит даже строку заголовков.');
+    return;
+  }
+
+  if (!Array.isArray(ordersData[0]) || ordersData[0].length === 0) {
+    SpreadsheetApp.getUi().alert('Ошибка: Заголовок на листе "orders" некорректен или пуст.');
+    return;
+  }
+
+  if (!Array.isArray(c1Data[0]) || c1Data[0].length === 0) {
+    SpreadsheetApp.getUi().alert('Ошибка: Заголовок на листе "1C" некорректен или пуст.');
+    return;
+  }
+
+  if (!hasNonEmptyHeaders(ordersData[0])) {
+    SpreadsheetApp.getUi().alert('Ошибка: На листе "orders" строка заголовков заполнена пустыми значениями.');
+    return;
+  }
+
+  if (!hasNonEmptyHeaders(c1Data[0])) {
+    SpreadsheetApp.getUi().alert('Ошибка: На листе "1C" строка заголовков заполнена пустыми значениями.');
+    return;
+  }
+
+  const reportHeaders = [
+    'Группа аналитического учёта', 'Категория товаров', 'Товарная группа 1',
+    'Номенклатура', 'Артикул', 'Артикул ВБ', 'Объём тары', 'Количество лаков в наборе',
+    'Заказано поставщику', 'В производстве', 'Остаток сырья в шт', 'Готовая продукция на складе',
+    'В резерве', 'Отгружено на РВБ', 'ФБО остаток',
+    'Заказы ФБО', 'Заказы ФБС', 'Сумма заказов', 'Уходимость'
+  ];
+
+  if (ordersData.length === 1 || c1Data.length === 1) {
+    sheetReport.getRange(1, 1, 1, reportHeaders.length).setValues([reportHeaders]);
+    sheetReport.getRange(1, 1, 1, reportHeaders.length).setFontWeight('bold').setBackground('#f3f3f3');
+    sheetReport.autoResizeColumns(1, reportHeaders.length);
+    SpreadsheetApp.getUi().alert('Данные после заголовков отсутствуют на одном или обоих исходных листах. Сформирован отчет только с заголовком.');
+    return;
+  }
+
   // 2. Индексация заголовков для динамического поиска колонок
   const ordersHeaders = ordersData[0];
   const c1Headers = c1Data[0];
@@ -116,14 +166,6 @@ function generateWbReport() {
   }
 
   // 5. Формирование массива отчета
-  const reportHeaders = [
-    'Группа аналитического учёта', 'Категория товаров', 'Товарная группа 1',
-    'Номенклатура', 'Артикул', 'Артикул ВБ', 'Объём тары', 'Количество лаков в наборе',
-    'Заказано поставщику', 'В производстве', 'Остаток сырья в шт', 'Готовая продукция на складе',
-    'В резерве', 'Отгружено на РВБ', 'ФБО остаток',
-    'Заказы ФБО', 'Заказы ФБС', 'Сумма заказов', 'Уходимость'
-  ];
-
   const reportData = [];
   const processedNom = new Set(); // Для проверки уникальности
 
