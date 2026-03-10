@@ -64,6 +64,7 @@ function generateWbReport() {
   const finalOutput = [REPORT_HEADERS].concat(reportRows);
   sheetReport.getRange(1, 1, finalOutput.length, finalOutput[0].length).setValues(finalOutput);
   formatReportSheet(sheetReport, finalOutput.length, finalOutput[0].length);
+  buildAnalyticsDashboard(ss, reportRows);
   renderDashboard();
 
   SpreadsheetApp.getUi().alert(
