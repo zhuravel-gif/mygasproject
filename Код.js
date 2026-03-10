@@ -280,6 +280,7 @@ function generateWbReport() {
   // Оформление
   sheetReport.getRange(1, 1, 1, finalOutput[0].length).setFontWeight('bold').setBackground('#f3f3f3');
   sheetReport.autoResizeColumns(1, finalOutput[0].length);
+  buildAnalyticsDashboard(ss, reportData);
 
   SpreadsheetApp.getUi().alert(`Отчет успешно сформирован на листе "Отчет". Обработано уникальных номенклатур: ${reportData.length}. Дней для уходимости: ${daysCount}. Пропущено строк orders с пустым nmid: ${skippedOrdersByEmptyKey}. Пропущено строк 1С с пустым "Артикул ВБ": ${skipped1CByEmptyKey}.`);
 }

@@ -63,6 +63,7 @@ function generateWbReport() {
   const finalOutput = [REPORT_HEADERS].concat(reportRows);
   sheetReport.getRange(1, 1, finalOutput.length, finalOutput[0].length).setValues(finalOutput);
   formatReportSheet(sheetReport, finalOutput.length, finalOutput[0].length);
+  buildAnalyticsDashboard(ss, reportRows);
 
   SpreadsheetApp.getUi().alert(
     `Отчет успешно сформирован на листе "${REPORT_SHEET_NAME}". ` +
