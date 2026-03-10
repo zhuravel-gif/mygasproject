@@ -17,4 +17,8 @@ const REPORT_COLUMNS = {
   articleWb: 6,
   turnover: 19,
   oosDate: 20
+  ordersFbo: 16,
+  ordersFbs: 17,
+  ordersTotal: 18,
+  turnover: 19
 };
