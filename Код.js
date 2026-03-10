@@ -12,6 +12,15 @@ function onOpen() {
  * Основная функция генерации отчета
  */
 function generateWbReport() {
+  const normalizeKey = (value) => {
+    if (value === null || value === undefined) return '';
+
+    const normalized = String(value).trim();
+    if (!normalized) return '';
+
+    return normalized.replace(/^(\d+)\.0+$/, '$1');
+  };
+
   const ss = SpreadsheetApp.getActiveSpreadsheet();
   const sheetOrders = ss.getSheetByName('orders');
   const sheet1C = ss.getSheetByName('1C');
@@ -53,15 +62,20 @@ function generateWbReport() {
   // 3. Агрегация данных из orders (Сложность O(N))
   const ordersMap = new Map();
   const uniqueDates = new Set();
+  let skippedOrdersByEmptyKey = 0;
 
   for (let i = 1; i < ordersData.length; i++) {
     const row = ordersData[i];
-    const nmid = row[idxOrders.nmid];
+    const nmid = normalizeKey(row[idxOrders.nmid]);
     const iscancel = row[idxOrders.iscancel];
     const warehouse = row[idxOrders.warehousetype];
     const dateVal = row[idxOrders.date];
 
     if (iscancel != 0) continue; // Фильтр отмен
+    if (!nmid) {
+      skippedOrdersByEmptyKey += 1;
+      continue;
+    }
 
     // Собираем уникальные даты (приводим к строке YYYY-MM-DD для уникальности)
     if (dateVal instanceof Date) {
@@ -126,6 +140,7 @@ function generateWbReport() {
 
   const reportData = [];
   const processedNom = new Set(); // Для проверки уникальности
+  let skipped1CByEmptyKey = 0;
 
   for (let i = 1; i < c1Data.length; i++) {
     const row = c1Data[i];
@@ -135,7 +150,13 @@ function generateWbReport() {
     processedNom.add(nom);
 
     const artWb = row[idxC1.artWb];
-    const orderStats = ordersMap.get(artWb) || { fbo: 0, fbs: 0 };
+    const normalizedArtWb = normalizeKey(artWb);
+    if (!normalizedArtWb) {
+      skipped1CByEmptyKey += 1;
+      continue;
+    }
+
+    const orderStats = ordersMap.get(normalizedArtWb) || { fbo: 0, fbs: 0 };
     
     const fboOrders = orderStats.fbo;
     const fbsOrders = orderStats.fbs;
@@ -180,5 +201,11 @@ function generateWbReport() {
   sheetReport.getRange(1, 1, 1, finalOutput[0].length).setFontWeight('bold').setBackground('#f3f3f3');
   sheetReport.autoResizeColumns(1, finalOutput[0].length);
 
-  SpreadsheetApp.getUi().alert(`Отчет успешно сформирован на листе "Отчет". Обработано уникальных номенклатур: ${reportData.length}. Дней для уходимости: ${daysCount}.`);
+  SpreadsheetApp.getUi().alert(
+    `Отчет успешно сформирован на листе "Отчет". ` +
+    `Обработано уникальных номенклатур: ${reportData.length}. ` +
+    `Дней для уходимости: ${daysCount}. ` +
+    `Пропущено строк orders с пустым nmid: ${skippedOrdersByEmptyKey}. ` +
+    `Пропущено строк 1С с пустым "Артикул ВБ": ${skipped1CByEmptyKey}.`
+  );
 }
