@@ -22,6 +22,7 @@ function generateWbReport() {
   };
 
   const ss = SpreadsheetApp.getActiveSpreadsheet();
+  const tz = ss.getSpreadsheetTimeZone() || Session.getScriptTimeZone();
   const sheetOrders = ss.getSheetByName('orders');
   const sheet1C = ss.getSheetByName('1C');
   
@@ -41,6 +42,56 @@ function generateWbReport() {
   // 1. Получение данных
   const ordersData = sheetOrders.getDataRange().getValues();
   const c1Data = sheet1C.getDataRange().getValues();
+
+  const hasNonEmptyHeaders = (headersRow) => {
+    return headersRow.some((cell) => String(cell).trim() !== '');
+  };
+
+  if (ordersData.length < 1) {
+    SpreadsheetApp.getUi().alert('Ошибка: Лист "orders" не содержит даже строку заголовков.');
+    return;
+  }
+
+  if (c1Data.length < 1) {
+    SpreadsheetApp.getUi().alert('Ошибка: Лист "1C" не содержит даже строку заголовков.');
+    return;
+  }
+
+  if (!Array.isArray(ordersData[0]) || ordersData[0].length === 0) {
+    SpreadsheetApp.getUi().alert('Ошибка: Заголовок на листе "orders" некорректен или пуст.');
+    return;
+  }
+
+  if (!Array.isArray(c1Data[0]) || c1Data[0].length === 0) {
+    SpreadsheetApp.getUi().alert('Ошибка: Заголовок на листе "1C" некорректен или пуст.');
+    return;
+  }
+
+  if (!hasNonEmptyHeaders(ordersData[0])) {
+    SpreadsheetApp.getUi().alert('Ошибка: На листе "orders" строка заголовков заполнена пустыми значениями.');
+    return;
+  }
+
+  if (!hasNonEmptyHeaders(c1Data[0])) {
+    SpreadsheetApp.getUi().alert('Ошибка: На листе "1C" строка заголовков заполнена пустыми значениями.');
+    return;
+  }
+
+  const reportHeaders = [
+    'Группа аналитического учёта', 'Категория товаров', 'Товарная группа 1',
+    'Номенклатура', 'Артикул', 'Артикул ВБ', 'Объём тары', 'Количество лаков в наборе',
+    'Заказано поставщику', 'В производстве', 'Остаток сырья в шт', 'Готовая продукция на складе',
+    'В резерве', 'Отгружено на РВБ', 'ФБО остаток',
+    'Заказы ФБО', 'Заказы ФБС', 'Сумма заказов', 'Уходимость'
+  ];
+
+  if (ordersData.length === 1 || c1Data.length === 1) {
+    sheetReport.getRange(1, 1, 1, reportHeaders.length).setValues([reportHeaders]);
+    sheetReport.getRange(1, 1, 1, reportHeaders.length).setFontWeight('bold').setBackground('#f3f3f3');
+    sheetReport.autoResizeColumns(1, reportHeaders.length);
+    SpreadsheetApp.getUi().alert('Данные после заголовков отсутствуют на одном или обоих исходных листах. Сформирован отчет только с заголовком.');
+    return;
+  }
 
   // 2. Индексация заголовков для динамического поиска колонок
   const ordersHeaders = ordersData[0];
@@ -64,6 +115,46 @@ function generateWbReport() {
   const uniqueDates = new Set();
   let skippedOrdersByEmptyKey = 0;
 
+  const normalizeDateKey = (value) => {
+    if (!value) return null;
+
+    if (value instanceof Date) {
+      if (isNaN(value.getTime())) return null;
+      return Utilities.formatDate(value, tz, 'yyyy-MM-dd');
+    }
+
+    if (typeof value === 'string') {
+      const trimmed = value.trim();
+      if (!trimmed) return null;
+
+      // Поддерживаем ISO-дату YYYY-MM-DD без UTC-смещения.
+      const dateOnlyMatch = trimmed.match(/^(\d{4})-(\d{2})-(\d{2})$/);
+      if (dateOnlyMatch) {
+        const year = Number(dateOnlyMatch[1]);
+        const month = Number(dateOnlyMatch[2]);
+        const day = Number(dateOnlyMatch[3]);
+        const utcDate = new Date(Date.UTC(year, month - 1, day));
+
+        if (
+          utcDate.getUTCFullYear() === year &&
+          utcDate.getUTCMonth() === month - 1 &&
+          utcDate.getUTCDate() === day
+        ) {
+          return `${dateOnlyMatch[1]}-${dateOnlyMatch[2]}-${dateOnlyMatch[3]}`;
+        }
+      }
+
+      const parsedDate = new Date(trimmed);
+      if (!isNaN(parsedDate.getTime())) {
+        return Utilities.formatDate(parsedDate, tz, 'yyyy-MM-dd');
+      }
+
+      return null;
+    }
+
+    return null;
+  };
+
   for (let i = 1; i < ordersData.length; i++) {
     const row = ordersData[i];
     const nmid = normalizeKey(row[idxOrders.nmid]);
@@ -77,12 +168,9 @@ function generateWbReport() {
       continue;
     }
 
-    // Собираем уникальные даты (приводим к строке YYYY-MM-DD для уникальности)
-    if (dateVal instanceof Date) {
-      uniqueDates.add(dateVal.toISOString().split('T')[0]);
-    } else if (dateVal) {
-      uniqueDates.add(String(dateVal).split(' ')[0]);
-    }
+    // Собираем уникальные локальные даты в таймзоне таблицы.
+    const dateKey = normalizeDateKey(dateVal);
+    if (dateKey) uniqueDates.add(dateKey);
 
     if (!ordersMap.has(nmid)) {
       ordersMap.set(nmid, { fbo: 0, fbs: 0 });
@@ -130,14 +218,6 @@ function generateWbReport() {
   }
 
   // 5. Формирование массива отчета
-  const reportHeaders = [
-    'Группа аналитического учёта', 'Категория товаров', 'Товарная группа 1',
-    'Номенклатура', 'Артикул', 'Артикул ВБ', 'Объём тары', 'Количество лаков в наборе',
-    'Заказано поставщику', 'В производстве', 'Остаток сырья в шт', 'Готовая продукция на складе',
-    'В резерве', 'Отгружено на РВБ', 'ФБО остаток',
-    'Заказы ФБО', 'Заказы ФБС', 'Сумма заказов', 'Уходимость'
-  ];
-
   const reportData = [];
   const processedNom = new Set(); // Для проверки уникальности
   let skipped1CByEmptyKey = 0;
