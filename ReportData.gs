@@ -127,7 +127,7 @@ function buildReportRows(c1Data, ordersMap, daysCount) {
     artWb: getCol('Артикул ВБ'),
     cat: getCol('Категория товаров'),
     vol: getCol(['Объём тары', 'Объем тары']),
-    count: getCol(['Количество лаков в наборе', 'Количество лаков в наборе.']),
+    count: getCol('Количество лаков в наборе'),
     ordered: getCol('Заказано поставщику'),
     inProd: getCol('В производстве'),
     raw: getCol('Остаток сырья в шт'),
