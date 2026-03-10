@@ -1,4 +1,5 @@
 const REPORT_SHEET_NAME = 'Отчет';
+const DASHBOARD_SHEET_NAME = 'Dashboard';
 
 const REPORT_HEADERS = [
   'Группа аналитического учёта', 'Категория товаров', 'Товарная группа 1',
@@ -15,5 +16,8 @@ const REPORT_COLUMNS = {
   nomenclature: 4,
   article: 5,
   articleWb: 6,
+  ordersFbo: 16,
+  ordersFbs: 17,
+  ordersTotal: 18,
   turnover: 19
 };
