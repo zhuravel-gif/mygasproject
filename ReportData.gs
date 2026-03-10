@@ -110,33 +110,62 @@ function buildReportRows(c1Data, ordersMap, daysCount) {
     return acc;
   }, new Map());
 
+  const getMatchingIndices = (aliases) => {
+    const normalizedAliases = aliases.map((alias) => normalizeHeader(alias));
+    const indices = [];
+
+    normalizedHeaderMap.forEach((headerIdx, normalizedHeader) => {
+      const isMatch = normalizedAliases.some((normalizedAlias) => {
+        return normalizedHeader === normalizedAlias ||
+          normalizedHeader.indexOf(normalizedAlias) !== -1 ||
+          normalizedAlias.indexOf(normalizedHeader) !== -1;
+      });
+
+      if (isMatch) {
+        indices.push(headerIdx);
+      }
+    });
+
+    return Array.from(new Set(indices));
+  };
+
   const getCol = (nameOrAliases) => {
     const aliases = Array.isArray(nameOrAliases) ? nameOrAliases : [nameOrAliases];
 
-    for (let i = 0; i < aliases.length; i++) {
+    for (let i = 0; i < aliases.length; i += 1) {
       const idx = normalizedHeaderMap.get(normalizeHeader(aliases[i]));
-      if (idx !== undefined) return idx;
+      if (idx !== undefined) {
+        return idx;
+      }
+    }
+
+    const fuzzyMatches = getMatchingIndices(aliases);
+    if (fuzzyMatches.length === 1) {
+      return fuzzyMatches[0];
+    }
+    if (fuzzyMatches.length > 1) {
+      throw new Error(`Колонка "${aliases[0]}" найдена неоднозначно. Проверьте названия столбцов на листе 1С.`);
     }
 
     throw new Error(`Колонка "${aliases[0]}" не найдена на листе 1С.`);
   };
 
   const idxC1 = {
-    nom: getCol('Номенклатура.Наименование'),
-    art: getCol('Артикул'),
-    artWb: getCol('Артикул ВБ'),
-    cat: getCol('Категория товаров'),
+    nom: getCol(['Номенклатура.Наименование', 'Номенклатура', 'Наименование']),
+    art: getCol(['Артикул', 'Артикул поставщика']),
+    artWb: getCol(['Артикул ВБ', 'Артикул WB', 'nmID', 'nmid']),
+    cat: getCol(['Категория товаров', 'Категория']),
     vol: getCol(['Объём тары', 'Объем тары']),
-    count: getCol('Количество лаков в наборе'),
-    ordered: getCol('Заказано поставщику'),
-    inProd: getCol('В производстве'),
-    raw: getCol('Остаток сырья в шт'),
-    ready: getCol('Готовая продукция на складе'),
-    reserve: getCol('В резерве'),
-    sentRvb: getCol('Отгружено на РВБ'),
-    fboRest: getCol('ФБО остаток'),
-    groupAn: getCol('Группа аналитического учёта'),
-    group1: getCol('Товарная группа 1')
+    count: getCol(['Количество лаков в наборе', 'Количество в наборе']),
+    ordered: getCol(['Заказано поставщику', 'Заказано']),
+    inProd: getCol(['В производстве', 'Производство']),
+    raw: getCol(['Остаток сырья в шт', 'Остаток сырья']),
+    ready: getCol(['Готовая продукция на складе', 'Готовая продукция']),
+    reserve: getCol(['В резерве', 'Резерв']),
+    sentRvb: getCol(['Отгружено на РВБ', 'Отгружено']),
+    fboRest: getCol(['ФБО остаток', 'Остаток ФБО']),
+    groupAn: getCol(['Группа аналитического учёта', 'Группа аналитического учета', 'Группа аналитики']),
+    group1: getCol(['Товарная группа 1', 'Товарная группа'])
   };
 
   const reportData = [];

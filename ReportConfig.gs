@@ -15,10 +15,9 @@ const REPORT_COLUMNS = {
   nomenclature: 4,
   article: 5,
   articleWb: 6,
-  turnover: 19,
-  oosDate: 20
   ordersFbo: 16,
   ordersFbs: 17,
   ordersTotal: 18,
-  turnover: 19
+  turnover: 19,
+  oosDate: 20
 };
