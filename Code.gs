@@ -1,3 +1,3 @@
 function ping() {
-  SpreadsheetApp.getActiveSpreadsheet().toast('OK');
+  SpreadsheetApp.getActiveSpreadsheet().toast('OK 1');
 }
