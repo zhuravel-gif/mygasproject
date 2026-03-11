@@ -1,6 +1,7 @@
 const ANALYTICS_SHEET_NAME = 'Аналитика_данные';
 const DASHBOARD_SHEET_NAME = 'Dashboard';
 const TOP_SKU_LABELS_COUNT = 20;
+const ANALYTICS_CHART_COLUMN = 9;
 
 const ANALYTICS_HEADERS = [
   'SKU',
@@ -13,13 +14,14 @@ const ANALYTICS_HEADERS = [
 ];
 
 /**
- * Подготавливает лист аналитики и создает bubble chart на Dashboard.
+ * Подготавливает лист аналитики и создает bubble chart на том же листе.
  */
 function buildAnalyticsDashboard(ss, reportRows) {
   const analyticsRows = buildAnalyticsRows(reportRows);
   const analyticsSheet = getOrCreateSheet_(ss, ANALYTICS_SHEET_NAME);
 
   analyticsSheet.clear();
+  analyticsSheet.getCharts().forEach((chart) => analyticsSheet.removeChart(chart));
   analyticsSheet.getRange(1, 1, 1, ANALYTICS_HEADERS.length).setValues([ANALYTICS_HEADERS]);
 
   if (analyticsRows.length > 0) {
@@ -27,7 +29,7 @@ function buildAnalyticsDashboard(ss, reportRows) {
   }
 
   formatAnalyticsSheet_(analyticsSheet, analyticsRows.length + 1);
-  createDashboardBubbleChart_(ss, analyticsSheet, analyticsRows.length);
+  createAnalyticsBubbleChart_(analyticsSheet, analyticsRows.length);
 }
 
 /**
@@ -35,7 +37,7 @@ function buildAnalyticsDashboard(ss, reportRows) {
  */
 function buildAnalyticsRows(reportRows) {
   const salesBySku = reportRows
-    .map((row) => ({ sku: String(row[5] || ''), sales: toNumber_(row[17]) }))
+    .map((row) => ({ sku: String(row[5] || ''), sales: analyticsToNumber_(row[17]) }))
     .filter((item) => item.sku)
     .sort((a, b) => b.sales - a.sales);
 
@@ -49,10 +51,10 @@ function buildAnalyticsRows(reportRows) {
       if (!sku) return null;
 
       const category = row[1] || 'Без категории';
-      const turnover = toNumber_(row[18]);
+      const turnover = analyticsToNumber_(row[18]);
       const totalStock = getTotalStock_(row);
       const coverageDays = turnover > 0 ? Number((totalStock / turnover).toFixed(2)) : '';
-      const sales = toNumber_(row[17]);
+      const sales = analyticsToNumber_(row[17]);
       const label = labeledSkuSet.has(sku) ? sku : '';
 
       return [sku, category, turnover, coverageDays, totalStock, sales, label];
@@ -62,10 +64,10 @@ function buildAnalyticsRows(reportRows) {
 
 function getTotalStock_(reportRow) {
   const stockIndexes = [10, 11, 12, 13, 14];
-  return stockIndexes.reduce((sum, index) => sum + toNumber_(reportRow[index]), 0);
+  return stockIndexes.reduce((sum, index) => sum + analyticsToNumber_(reportRow[index]), 0);
 }
 
-function toNumber_(value) {
+function analyticsToNumber_(value) {
   const parsed = Number(value);
   return isNaN(parsed) ? 0 : parsed;
 }
@@ -96,21 +98,18 @@ function formatAnalyticsSheet_(sheet, rowsCount) {
   sheet.autoResizeColumns(1, ANALYTICS_HEADERS.length);
 }
 
-function createDashboardBubbleChart_(ss, analyticsSheet, dataRowsCount) {
-  const dashboardSheet = getOrCreateSheet_(ss, DASHBOARD_SHEET_NAME);
-  dashboardSheet.clear();
-
+function createAnalyticsBubbleChart_(analyticsSheet, dataRowsCount) {
   if (dataRowsCount === 0) {
-    dashboardSheet.getRange('A1').setValue('Нет данных для построения графика.');
+    analyticsSheet.getRange(1, ANALYTICS_CHART_COLUMN).setValue('Нет данных для построения графика.');
     return;
   }
 
-  const dataRange = analyticsSheet.getRange(2, 1, dataRowsCount, ANALYTICS_HEADERS.length);
+  const dataRange = analyticsSheet.getRange(1, 1, dataRowsCount + 1, ANALYTICS_HEADERS.length);
 
-  const chart = dashboardSheet.newChart()
+  const chart = analyticsSheet.newChart()
     .setChartType(Charts.ChartType.BUBBLE)
     .addRange(dataRange)
-    .setPosition(1, 1, 0, 0)
+    .setPosition(1, ANALYTICS_CHART_COLUMN, 0, 0)
     .setOption('title', 'Уходимость / Покрытие запасом / Остаток')
     .setOption('hAxis', { title: 'Уходимость' })
     .setOption('vAxis', { title: 'Покрытие запасом (дни)' })
@@ -119,8 +118,7 @@ function createDashboardBubbleChart_(ss, analyticsSheet, dataRowsCount) {
     })
     .setOption('sizeAxis', { minSize: 4, maxSize: 30 })
     .setOption('legend', { position: 'right' })
-    .setOption('useFirstColumnAsDomain', false)
     .build();
 
-  dashboardSheet.insertChart(chart);
+  analyticsSheet.insertChart(chart);
 }
