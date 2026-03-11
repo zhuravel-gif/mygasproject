@@ -1,188 +1,70 @@
 /**
- * Импортирует данные из MXL(XML) файла в лист "info".
+ * Импортирует данные из XLSX файла в лист "1C".
  * Приоритет источника:
- * 1) Script Properties: MXL_FILE_ID
- * 2) Константа: MXL_SOURCE_FILE_ID
- * 3) Последний подходящий файл из папки (MXL_SOURCE_FOLDER_ID)
+ * 1) Script Properties: XLSX_FILE_ID
+ * 2) Константа: XLSX_SOURCE_FILE_ID
+ * 3) Последний XLSX из папки (Script Properties XLSX_FOLDER_ID или XLSX_SOURCE_FOLDER_ID)
+ *
+ * Требуется включенный Advanced Google service: Drive API.
  */
-function importInfoFromMxl() {
+function import1CFromXlsx() {
   const ss = SpreadsheetApp.getActiveSpreadsheet();
-  let infoSheet = ss.getSheetByName('info');
-
-  if (!infoSheet) {
-    infoSheet = ss.insertSheet('info');
+  let targetSheet = ss.getSheetByName('1C');
+  if (!targetSheet) {
+    targetSheet = ss.insertSheet('1C');
   }
 
-  let sourceFile;
-  try {
-    sourceFile = resolveMxlSourceFile_();
-  } catch (error) {
-    const result = {
-      status: 'error',
-      rowsImported: 0,
-      message: 'Не удалось определить источник MXL: ' + error.message
-    };
-    Logger.log(result.message);
-    return result;
-  }
-
+  const sourceFile = resolveXlsxSourceFile_();
   if (!sourceFile) {
-    const result = {
-      status: 'error',
-      rowsImported: 0,
-      message: 'Источник MXL не найден. Укажите MXL_FILE_ID/MXL_SOURCE_FILE_ID или добавьте XML/MXL файл в папку источника.'
-    };
-    Logger.log(result.message);
-    return result;
+    throw new Error('Источник XLSX не найден. Укажите XLSX_FILE_ID/XLSX_SOURCE_FILE_ID или добавьте xlsx в папку источника.');
   }
 
-  let sourceBlob;
-  let xmlText;
+  const convertedFileId = convertXlsxToTemporaryGoogleSheet_(sourceFile);
+
   try {
-    sourceBlob = sourceFile.getBlob();
-    xmlText = sourceBlob.getDataAsString();
-  } catch (error) {
-    const result = {
-      status: 'error',
-      rowsImported: 0,
-      message: 'Не удалось прочитать файл MXL: ' + sourceFile.getName() + ' (' + sourceFile.getId() + ')'
-    };
-    Logger.log(result.message + '. ' + error.message);
-    return result;
-  }
+    const sourceSpreadsheet = SpreadsheetApp.openById(convertedFileId);
+    const sourceSheet = sourceSpreadsheet.getSheets()[0];
 
-  if (!xmlText || !String(xmlText).trim()) {
-    const result = {
-      status: 'error',
-      rowsImported: 0,
-      message: 'Файл MXL пустой: ' + sourceFile.getName()
-    };
-    Logger.log(result.message);
-    return result;
-  }
-
-  let document;
-  try {
-    document = parseXmlDocumentWithFallback_(sourceBlob, xmlText);
-  } catch (error) {
-    const result = {
-      status: 'error',
-      rowsImported: 0,
-      message: 'Невалидный XML/MXL формат в файле ' + sourceFile.getName() + ': ' + error.message
-    };
-    Logger.log(result.message);
-    return result;
-  }
-
-  let rows;
-  try {
-    rows = flattenXmlDocument_(document);
-  } catch (error) {
-    const result = {
-      status: 'error',
-      rowsImported: 0,
-      message: 'Ошибка структуры MXL: ' + error.message
-    };
-    Logger.log(result.message);
-    return result;
-  }
-
-  if (!rows || rows.length <= 1) {
-    const result = {
-      status: 'error',
-      rowsImported: 0,
-      message: 'В MXL не найдены данные для импорта.'
-    };
-    Logger.log(result.message);
-    return result;
-  }
-
-  infoSheet.clearContents();
-  infoSheet.getRange(1, 1, rows.length, rows[0].length).setValues(rows);
-
-  const result = {
-    status: 'ok',
-    rowsImported: rows.length - 1,
-    message: 'Импорт завершен. Файл: ' + sourceFile.getName() + '. Загружено строк: ' + (rows.length - 1)
-  };
-  Logger.log(result.message);
-  return result;
-}
-
-
-function parseXmlDocumentWithFallback_(blob, defaultText) {
-  const attempted = [];
-  const variants = [
-    { label: 'utf-8', text: defaultText },
-    { label: 'windows-1251', charset: 'windows-1251' },
-    { label: 'cp1251', charset: 'cp1251' },
-    { label: 'cp866', charset: 'cp866' }
-  ];
-
-  for (let i = 0; i < variants.length; i += 1) {
-    const variant = variants[i];
-    try {
-      const variantText = Object.prototype.hasOwnProperty.call(variant, 'text')
-        ? variant.text
-        : blob.getDataAsString(variant.charset);
-      const cleaned = normalizeXmlText_(variantText);
-      if (!cleaned) {
-        attempted.push(variant.label + ': empty');
-        continue;
-      }
-      return XmlService.parse(cleaned);
-    } catch (error) {
-      attempted.push(variant.label + ': ' + error.message);
+    if (!sourceSheet) {
+      throw new Error('Во временно конвертированном файле не найдено листов.');
     }
-  }
 
-  throw new Error('не удалось распознать XML. Попытки: ' + attempted.join(' | '));
+    const data = sourceSheet.getDataRange().getValues();
+    targetSheet.clearContents();
+
+    if (data.length > 0 && data[0].length > 0) {
+      targetSheet.getRange(1, 1, data.length, data[0].length).setValues(data);
+    }
+
+    return {
+      status: 'ok',
+      rowsImported: Math.max(data.length - 1, 0),
+      fileName: sourceFile.getName(),
+      fileId: sourceFile.getId()
+    };
+  } finally {
+    trashTemporaryFile_(convertedFileId);
+  }
 }
 
-function normalizeXmlText_(text) {
-  const input = String(text || '');
-  if (!input.trim()) {
-    return '';
-  }
-
-  const withoutBom = input.replace(/^\uFEFF/, '');
-  const xmlStart = withoutBom.indexOf('<');
-
-  if (xmlStart === -1) {
-    return withoutBom.trim();
-  }
-
-  return withoutBom.slice(xmlStart).trim();
-}
-
-function resolveMxlSourceFile_() {
+function resolveXlsxSourceFile_() {
   const scriptProps = PropertiesService.getScriptProperties();
-  const explicitFileId = String(scriptProps.getProperty('MXL_FILE_ID') || MXL_SOURCE_FILE_ID || '').trim();
+  const explicitFileId = String(scriptProps.getProperty('XLSX_FILE_ID') || XLSX_SOURCE_FILE_ID || '').trim();
 
   if (explicitFileId) {
-    try {
-      return DriveApp.getFileById(explicitFileId);
-    } catch (error) {
-      throw new Error('Файл по MXL_FILE_ID/MXL_SOURCE_FILE_ID не найден: ' + explicitFileId);
-    }
+    return DriveApp.getFileById(explicitFileId);
   }
 
-  const folderId = String(scriptProps.getProperty('MXL_FOLDER_ID') || MXL_SOURCE_FOLDER_ID || '').trim();
+  const folderId = String(scriptProps.getProperty('XLSX_FOLDER_ID') || XLSX_SOURCE_FOLDER_ID || '').trim();
   if (!folderId) {
     return null;
   }
 
-  let folder;
-  try {
-    folder = DriveApp.getFolderById(folderId);
-  } catch (error) {
-    throw new Error('Папка источника не найдена: ' + folderId);
-  }
-
-  return findLatestMxlFileInFolder_(folder);
+  const folder = DriveApp.getFolderById(folderId);
+  return findLatestXlsxFileInFolder_(folder);
 }
 
-function findLatestMxlFileInFolder_(folder) {
+function findLatestXlsxFileInFolder_(folder) {
   const files = folder.getFiles();
   let latestFile = null;
   let latestTime = 0;
@@ -190,12 +72,7 @@ function findLatestMxlFileInFolder_(folder) {
   while (files.hasNext()) {
     const file = files.next();
     const name = String(file.getName() || '').toLowerCase();
-    const mimeType = String(file.getMimeType() || '').toLowerCase();
-    const isMxlOrXml = /\.(mxl|xml)$/.test(name) || mimeType.indexOf('xml') !== -1;
-
-    if (!isMxlOrXml) {
-      continue;
-    }
+    if (!/\.xlsx$/.test(name)) continue;
 
     const updatedAt = file.getLastUpdated().getTime();
     if (updatedAt > latestTime) {
@@ -207,66 +84,21 @@ function findLatestMxlFileInFolder_(folder) {
   return latestFile;
 }
 
-/**
- * Преобразует XML в двумерный массив:
- * [path, text, attr:*]
- */
-function flattenXmlDocument_(document) {
-  const root = document.getRootElement();
-  if (!root) {
-    throw new Error('Отсутствует корневой элемент XML.');
+function convertXlsxToTemporaryGoogleSheet_(file) {
+  const resource = {
+    title: '[tmp-import] ' + file.getName() + ' ' + new Date().toISOString(),
+    mimeType: MimeType.GOOGLE_SHEETS
+  };
+
+  const converted = Drive.Files.insert(resource, file.getBlob(), { convert: true });
+  if (!converted || !converted.id) {
+    throw new Error('Не удалось конвертировать XLSX в Google Sheets.');
   }
 
-  const records = [];
-  collectXmlRecords_(root, root.getName(), records);
-
-  if (records.length === 0) {
-    throw new Error('Отсутствуют элементы для записи.');
-  }
-
-  const attrNames = Array.from(records.reduce((set, record) => {
-    Object.keys(record.attrs).forEach((name) => set.add(name));
-    return set;
-  }, new Set())).sort((a, b) => a.localeCompare(b));
-
-  const headers = ['path', 'text'].concat(attrNames.map((name) => 'attr:' + name));
-  const values = records.map((record) => {
-    const row = [record.path, record.text];
-    attrNames.forEach((name) => row.push(record.attrs[name] || ''));
-    return row;
-  });
-
-  const hasData = values.some((row) => {
-    return row.slice(1).some((cell) => String(cell).trim() !== '');
-  });
-
-  if (!hasData) {
-    throw new Error('Структура XML не содержит текстовых значений или атрибутов.');
-  }
-
-  return [headers].concat(values);
+  return converted.id;
 }
 
-function collectXmlRecords_(element, path, records) {
-  const children = element.getChildren();
-  const attrs = element.getAttributes().reduce((acc, attribute) => {
-    acc[attribute.getName()] = attribute.getValue();
-    return acc;
-  }, {});
-
-  const text = String(element.getText() || '').trim();
-  const isLeaf = children.length === 0;
-  const hasAttrs = Object.keys(attrs).length > 0;
-
-  if (isLeaf || hasAttrs || text) {
-    records.push({
-      path: path,
-      text: text,
-      attrs: attrs
-    });
-  }
-
-  children.forEach((child) => {
-    collectXmlRecords_(child, path + '/' + child.getName(), records);
-  });
+function trashTemporaryFile_(fileId) {
+  if (!fileId) return;
+  DriveApp.getFileById(fileId).setTrashed(true);
 }

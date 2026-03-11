@@ -40,15 +40,16 @@ function formatReportSheet(sheetReport, rowsCount, colsCount) {
  */
 function applyOosConditionalFormatting(sheetReport, rowsCount) {
   const oosRange = sheetReport.getRange(2, REPORT_COLUMNS.oosDate, rowsCount - 1, 1);
+  const oosColLetter = columnToLetter(REPORT_COLUMNS.oosDate);
 
   const redRule = SpreadsheetApp.newConditionalFormatRule()
-    .whenFormulaSatisfied('=AND($T2<>"",$T2>=TODAY(),$T2<=TODAY()+7)')
+    .whenFormulaSatisfied(`=AND($${oosColLetter}2<>"",$${oosColLetter}2>=TODAY(),$${oosColLetter}2<=TODAY()+7)`)
     .setBackground('#f4cccc')
     .setRanges([oosRange])
     .build();
 
   const yellowRule = SpreadsheetApp.newConditionalFormatRule()
-    .whenFormulaSatisfied('=AND($T2<>"",$T2>TODAY()+7,$T2<=TODAY()+14)')
+    .whenFormulaSatisfied(`=AND($${oosColLetter}2<>"",$${oosColLetter}2>TODAY()+7,$${oosColLetter}2<=TODAY()+14)`)
     .setBackground('#fff2cc')
     .setRanges([oosRange])
     .build();
