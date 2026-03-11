@@ -1,33 +1,19 @@
 /**
- * Точка входа для ежедневного импорта MXL (триггер/ручной запуск).
+ * Точка входа для ежедневного импорта XLSX (триггер/ручной запуск).
  */
-function runDailyMxlImportJob() {
+function runDailyXlsxImportJob() {
   try {
-    const importedRows = executeMxlImport_();
-    appendImportLog_('SUCCESS', 'Импорт выполнен успешно.', {
-      rows: importedRows,
-      details: ''
+    const result = import1CFromXlsx();
+    appendImportLog_('SUCCESS', 'Импорт XLSX выполнен успешно.', {
+      rows: result.rowsImported,
+      details: `Файл: ${result.fileName} (${result.fileId})`
     });
-    return importedRows;
+    return result.rowsImported;
   } catch (error) {
-    appendImportLog_('ERROR', 'Ошибка импорта MXL.', {
+    appendImportLog_('ERROR', 'Ошибка импорта XLSX.', {
       rows: 0,
       details: error && error.stack ? error.stack : String(error)
     });
     throw error;
   }
-}
-
-/**
- * Внутренний исполнитель импорта.
- *
- * Если в проекте уже есть функция импорта, используем её без изменения API.
- */
-function executeMxlImport_() {
-  if (typeof importMxlData === 'function') {
-    const result = importMxlData();
-    return Number(result) || 0;
-  }
-
-  throw new Error('Функция importMxlData() не найдена. Подключите существующий модуль импорта MXL.');
 }

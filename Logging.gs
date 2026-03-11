@@ -1,9 +1,6 @@
 const IMPORT_LOG_SHEET_NAME = 'logs';
 const IMPORT_LOG_HEADERS = ['Timestamp', 'Job', 'Status', 'Rows', 'Message', 'Details'];
 
-/**
- * Добавляет строку в журнал импорта MXL.
- */
 function appendImportLog_(status, message, meta) {
   const sheet = getOrCreateImportLogSheet_();
   const payload = meta || {};
@@ -12,7 +9,7 @@ function appendImportLog_(status, message, meta) {
 
   sheet.appendRow([
     new Date(),
-    'MXL import',
+    'XLSX import',
     status,
     rows,
     message || '',
