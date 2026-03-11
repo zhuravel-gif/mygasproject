@@ -40,8 +40,11 @@ function generateWbReport() {
   if (ordersData.length === 1 || c1Data.length === 1) {
     sheetReport.getRange(1, 1, 1, REPORT_HEADERS.length).setValues([REPORT_HEADERS]);
     formatReportSheet(sheetReport, 1, REPORT_HEADERS.length);
+    buildAnalyticsDashboard(ss, []);
     renderDashboard();
-    SpreadsheetApp.getUi().alert('Данные после заголовков отсутствуют на одном или обоих исходных листах. Сформирован отчет только с заголовком.');
+    SpreadsheetApp.getUi().alert(
+      'Данные после заголовков отсутствуют на одном или обоих исходных листах. Сформирован отчет только с заголовком.'
+    );
     return;
   }
 
@@ -69,11 +72,25 @@ function generateWbReport() {
 
   SpreadsheetApp.getUi().alert(
     `Отчет успешно сформирован на листе "${REPORT_SHEET_NAME}". ` +
-      `Обработано уникальных номенклатур: ${reportRows.length}. ` +
+      `Обработано строк: ${reportRows.length}. ` +
       `Дней для уходимости: ${aggregation.daysCount}.`
   );
 }
 
+/**
+ * Автоматическое обновление KPI-дешборда при смене фильтров.
+ */
+function onEdit(e) {
+  if (!e || !e.range) return;
+
+  const sheet = e.range.getSheet();
+  if (!sheet || sheet.getName() !== DASHBOARD_SHEET_NAME) return;
+
+  const editedCell = e.range.getA1Notation();
+  if (['B2', 'B3', 'B4'].indexOf(editedCell) === -1) return;
+
+  renderDashboard();
+}
 
 /**
  * Рендер дашборда с KPI по общему отчету и по выбранным фильтрам.
@@ -87,10 +104,16 @@ function renderDashboard() {
   let dashboardSheet = ss.getSheetByName(DASHBOARD_SHEET_NAME);
   if (!dashboardSheet) {
     dashboardSheet = ss.insertSheet(DASHBOARD_SHEET_NAME);
-  } else {
-    dashboardSheet.clear();
-    dashboardSheet.clearConditionalFormatRules();
   }
+
+  const previousSelections = {
+    group: String(dashboardSheet.getRange('B2').getValue() || '').trim(),
+    category: String(dashboardSheet.getRange('B3').getValue() || '').trim(),
+    productGroup: String(dashboardSheet.getRange('B4').getValue() || '').trim()
+  };
+
+  dashboardSheet.clear();
+  dashboardSheet.clearConditionalFormatRules();
 
   const lastRow = reportSheet.getLastRow();
   const lastCol = reportSheet.getLastColumn();
@@ -99,10 +122,13 @@ function renderDashboard() {
   dashboardSheet.getRange('A2').setValue('Группа аналитического учёта');
   dashboardSheet.getRange('A3').setValue('Категория товаров');
   dashboardSheet.getRange('A4').setValue('Товарная группа 1');
+  dashboardSheet.getRange('A2:A4').setFontWeight('bold');
+  dashboardSheet.getRange('A2:B4').setBackground('#f5f7fa');
 
   if (lastRow < 2) {
     dashboardSheet.getRange('A6').setValue('Нет данных для отображения KPI.');
-    dashboardSheet.autoResizeColumns(1, 6);
+    dashboardSheet.setColumnWidths(1, 2, 260);
+    dashboardSheet.autoResizeColumns(3, 6);
     return;
   }
 
@@ -110,15 +136,19 @@ function renderDashboard() {
   const allOption = 'Все';
 
   const groupValues = getUniqueValues_(reportData, REPORT_COLUMNS.groupAn - 1);
-  const selectedGroup = buildSelector_(dashboardSheet, 'B2', groupValues, allOption);
+  const selectedGroup = buildSelector_(dashboardSheet, 'B2', groupValues, allOption, previousSelections.group);
 
-  const categorySource = reportData.filter((row) => selectedGroup === allOption || String(row[REPORT_COLUMNS.groupAn - 1]) === selectedGroup);
+  const categorySource = reportData.filter((row) => {
+    return selectedGroup === allOption || String(row[REPORT_COLUMNS.groupAn - 1]) === selectedGroup;
+  });
   const categoryValues = getUniqueValues_(categorySource, REPORT_COLUMNS.category - 1);
-  const selectedCategory = buildSelector_(dashboardSheet, 'B3', categoryValues, allOption);
+  const selectedCategory = buildSelector_(dashboardSheet, 'B3', categoryValues, allOption, previousSelections.category);
 
-  const productGroupSource = categorySource.filter((row) => selectedCategory === allOption || String(row[REPORT_COLUMNS.category - 1]) === selectedCategory);
+  const productGroupSource = categorySource.filter((row) => {
+    return selectedCategory === allOption || String(row[REPORT_COLUMNS.category - 1]) === selectedCategory;
+  });
   const productGroupValues = getUniqueValues_(productGroupSource, REPORT_COLUMNS.productGroup1 - 1);
-  const selectedProductGroup = buildSelector_(dashboardSheet, 'B4', productGroupValues, allOption);
+  const selectedProductGroup = buildSelector_(dashboardSheet, 'B4', productGroupValues, allOption, previousSelections.productGroup);
 
   const filteredData = reportData.filter((row) => {
     const groupMatch = selectedGroup === allOption || String(row[REPORT_COLUMNS.groupAn - 1]) === selectedGroup;
@@ -133,10 +163,8 @@ function renderDashboard() {
   dashboardSheet.getRange('A13').setValue('KPI по фильтру').setFontWeight('bold').setFontSize(12);
   renderKpiBlock_(dashboardSheet, 14, filteredData);
 
-  dashboardSheet.getRange('A2:A4').setFontWeight('bold');
-  dashboardSheet.getRange('A2:B4').setBackground('#f5f7fa');
   dashboardSheet.setColumnWidths(1, 2, 260);
-  dashboardSheet.autoResizeColumns(3, 6);
+  dashboardSheet.autoResizeColumns(3, 8);
 }
 
 function getUniqueValues_(rows, idx) {
@@ -146,11 +174,10 @@ function getUniqueValues_(rows, idx) {
   return Array.from(new Set(values)).sort((a, b) => a.localeCompare(b));
 }
 
-function buildSelector_(sheet, a1, values, allOption) {
+function buildSelector_(sheet, a1, values, allOption, preferredValue) {
   const options = [allOption].concat(values);
+  const nextValue = options.indexOf(preferredValue) === -1 ? allOption : preferredValue;
   const range = sheet.getRange(a1);
-  const currentValue = String(range.getValue() || '').trim();
-  const nextValue = options.indexOf(currentValue) === -1 ? allOption : currentValue;
 
   const validation = SpreadsheetApp.newDataValidation()
     .requireValueInList(options, true)
