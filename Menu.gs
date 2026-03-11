@@ -6,5 +6,7 @@ function onOpen() {
     .createMenu('Отчетность ВБ')
     .addItem('Создать отчет', 'generateWbReport')
     .addItem('Запустить MXL импорт', 'runDailyMxlImportJob')
+    .addSeparator()
+    .addItem('Установить ежедневный импорт 04:00', 'setupDailyMxlImportTrigger')
     .addToUi();
 }

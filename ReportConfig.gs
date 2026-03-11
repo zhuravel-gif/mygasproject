@@ -1,3 +1,6 @@
+const MXL_SOURCE_FILE_ID = '';
+const MXL_SOURCE_FOLDER_ID = '1xdR6UTj8kpiuu3YqdDbty2tZTl8jM9e7';
+
 const REPORT_SHEET_NAME = 'Отчет';
 
 const REPORT_HEADERS = [
