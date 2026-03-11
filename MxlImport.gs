@@ -36,9 +36,11 @@ function importInfoFromMxl() {
     return result;
   }
 
+  let sourceBlob;
   let xmlText;
   try {
-    xmlText = sourceFile.getBlob().getDataAsString();
+    sourceBlob = sourceFile.getBlob();
+    xmlText = sourceBlob.getDataAsString();
   } catch (error) {
     const result = {
       status: 'error',
@@ -61,7 +63,7 @@ function importInfoFromMxl() {
 
   let document;
   try {
-    document = XmlService.parse(xmlText);
+    document = parseXmlDocumentWithFallback_(sourceBlob, xmlText);
   } catch (error) {
     const result = {
       status: 'error',
@@ -105,6 +107,52 @@ function importInfoFromMxl() {
   };
   Logger.log(result.message);
   return result;
+}
+
+
+function parseXmlDocumentWithFallback_(blob, defaultText) {
+  const attempted = [];
+  const variants = [
+    { label: 'utf-8', text: defaultText },
+    { label: 'windows-1251', charset: 'windows-1251' },
+    { label: 'cp1251', charset: 'cp1251' },
+    { label: 'cp866', charset: 'cp866' }
+  ];
+
+  for (let i = 0; i < variants.length; i += 1) {
+    const variant = variants[i];
+    try {
+      const variantText = Object.prototype.hasOwnProperty.call(variant, 'text')
+        ? variant.text
+        : blob.getDataAsString(variant.charset);
+      const cleaned = normalizeXmlText_(variantText);
+      if (!cleaned) {
+        attempted.push(variant.label + ': empty');
+        continue;
+      }
+      return XmlService.parse(cleaned);
+    } catch (error) {
+      attempted.push(variant.label + ': ' + error.message);
+    }
+  }
+
+  throw new Error('не удалось распознать XML. Попытки: ' + attempted.join(' | '));
+}
+
+function normalizeXmlText_(text) {
+  const input = String(text || '');
+  if (!input.trim()) {
+    return '';
+  }
+
+  const withoutBom = input.replace(/^\uFEFF/, '');
+  const xmlStart = withoutBom.indexOf('<');
+
+  if (xmlStart === -1) {
+    return withoutBom.trim();
+  }
+
+  return withoutBom.slice(xmlStart).trim();
 }
 
 function resolveMxlSourceFile_() {
