@@ -1,0 +1,322 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <base target="_top">
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        margin: 0;
+        padding: 20px;
+        color: #202124;
+      }
+
+      .title {
+        font-size: 18px;
+        font-weight: 700;
+        margin-bottom: 14px;
+      }
+
+      .card {
+        border: 1px solid #dadce0;
+        border-radius: 12px;
+        padding: 14px 16px;
+        margin-bottom: 16px;
+        background: #fff;
+      }
+
+      .label {
+        font-size: 12px;
+        color: #5f6368;
+        margin-bottom: 6px;
+      }
+
+      .value {
+        font-size: 14px;
+        font-weight: 600;
+        word-break: break-word;
+      }
+
+      select {
+        width: 100%;
+        padding: 10px 12px;
+        border: 1px solid #dadce0;
+        border-radius: 8px;
+        font-size: 14px;
+        background: #fff;
+      }
+
+      .status {
+        margin: 14px 0 10px;
+        font-size: 14px;
+      }
+
+      .progress-wrap {
+        width: 100%;
+        height: 14px;
+        background: #eceff1;
+        border-radius: 999px;
+        overflow: hidden;
+        margin-bottom: 16px;
+      }
+
+      .progress-bar {
+        width: 0%;
+        height: 100%;
+        background: #1a73e8;
+        transition: width 0.25s ease;
+      }
+
+      .actions {
+        display: flex;
+        gap: 10px;
+        justify-content: flex-end;
+        margin-top: 18px;
+      }
+
+      button {
+        border: none;
+        border-radius: 8px;
+        padding: 10px 16px;
+        font-size: 14px;
+        cursor: pointer;
+      }
+
+      .btn-secondary {
+        background: #f1f3f4;
+        color: #202124;
+      }
+
+      .btn-primary {
+        background: #1a73e8;
+        color: #fff;
+      }
+
+      .btn-primary:disabled,
+      .btn-secondary:disabled,
+      select:disabled {
+        opacity: 0.6;
+        cursor: default;
+      }
+
+      .result {
+        margin-top: 16px;
+        padding: 12px 14px;
+        border-radius: 10px;
+        display: none;
+        white-space: pre-line;
+      }
+
+      .result.success {
+        display: block;
+        background: #e6f4ea;
+        color: #137333;
+        border: 1px solid #c7e7cd;
+      }
+
+      .result.error {
+        display: block;
+        background: #fce8e6;
+        color: #c5221f;
+        border: 1px solid #f6c7c2;
+      }
+
+      .muted {
+        color: #5f6368;
+        font-size: 12px;
+      }
+
+      .meta {
+        margin-top: 10px;
+        font-size: 13px;
+        color: #3c4043;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="title">Импорт XLSX в лист Info</div>
+
+    <div class="card">
+      <div class="label">Выбери файл для импорта</div>
+      <select id="fileSelect" onchange="onFileChange()" disabled>
+        <option value="">Загрузка списка файлов...</option>
+      </select>
+
+      <div class="meta">
+        <div><strong>Дата обновления:</strong> <span id="fileUpdated">—</span></div>
+        <div><strong>Целевой лист:</strong> <span id="targetSheet">Info</span></div>
+      </div>
+    </div>
+
+    <div class="status" id="statusText">Подготовка списка файлов...</div>
+
+    <div class="progress-wrap">
+      <div class="progress-bar" id="progressBar"></div>
+    </div>
+
+    <div class="muted">
+      В лист `Info` будут записаны фиксированные заголовки схемы. Данные из XLSX будут импортированы начиная со 2 строки.
+    </div>
+
+    <div class="result" id="resultBox"></div>
+
+    <div class="actions">
+      <button class="btn-secondary" id="closeBtn" onclick="closeDialog()">Закрыть</button>
+      <button class="btn-primary" id="importBtn" onclick="startImport()" disabled>Импортировать</button>
+    </div>
+
+    <script>
+      let files = [];
+      let selectedFileId = '';
+
+      document.addEventListener('DOMContentLoaded', loadFiles);
+
+      function setProgress(percent) {
+        document.getElementById('progressBar').style.width = percent + '%';
+      }
+
+      function setStatus(text) {
+        document.getElementById('statusText').textContent = text;
+      }
+
+      function showResult(message, isSuccess) {
+        const box = document.getElementById('resultBox');
+        box.textContent = message;
+        box.className = 'result ' + (isSuccess ? 'success' : 'error');
+      }
+
+      function clearResult() {
+        const box = document.getElementById('resultBox');
+        box.textContent = '';
+        box.className = 'result';
+      }
+
+      function setRunningState(isRunning) {
+        document.getElementById('closeBtn').disabled = isRunning;
+        document.getElementById('fileSelect').disabled = isRunning || files.length === 0;
+        document.getElementById('importBtn').disabled = isRunning || !selectedFileId;
+      }
+
+      function loadFiles() {
+        setStatus('Загружаю список XLSX-файлов...');
+        setProgress(15);
+        setRunningState(true);
+
+        google.script.run
+          .withSuccessHandler(function(data) {
+            files = data.files || [];
+            document.getElementById('targetSheet').textContent = data.targetSheetName || 'Info';
+
+            const select = document.getElementById('fileSelect');
+            select.innerHTML = '';
+
+            if (!files.length) {
+              const option = document.createElement('option');
+              option.value = '';
+              option.textContent = 'XLSX-файлы не найдены';
+              select.appendChild(option);
+
+              document.getElementById('fileUpdated').textContent = '—';
+              selectedFileId = '';
+              setStatus('В папке нет XLSX-файлов');
+              setProgress(100);
+              showResult('В указанной папке не найдено ни одного .xlsx файла.', false);
+              setRunningState(false);
+              return;
+            }
+
+            const placeholder = document.createElement('option');
+            placeholder.value = '';
+            placeholder.textContent = 'Выбери файл...';
+            select.appendChild(placeholder);
+
+            files.forEach(function(file) {
+              const option = document.createElement('option');
+              option.value = file.id;
+              option.textContent = file.name;
+              select.appendChild(option);
+            });
+
+            selectedFileId = '';
+            document.getElementById('fileUpdated').textContent = '—';
+            setStatus('Выбери файл для импорта');
+            setProgress(35);
+            clearResult();
+            setRunningState(false);
+          })
+          .withFailureHandler(function(error) {
+            setStatus('Ошибка загрузки списка файлов');
+            setProgress(100);
+            showResult(error.message || String(error), false);
+            setRunningState(false);
+          })
+          .getImportableFiles();
+      }
+
+      function onFileChange() {
+        clearResult();
+
+        const select = document.getElementById('fileSelect');
+        selectedFileId = select.value;
+
+        const selected = files.find(function(file) {
+          return file.id === selectedFileId;
+        });
+
+        document.getElementById('fileUpdated').textContent = selected ? selected.updatedFormatted : '—';
+        document.getElementById('importBtn').disabled = !selectedFileId;
+
+        if (selected) {
+          setStatus('Файл выбран. Можно запускать импорт.');
+          setProgress(45);
+        } else {
+          setStatus('Выбери файл для импорта');
+          setProgress(35);
+        }
+      }
+
+      function startImport() {
+        if (!selectedFileId) {
+          showResult('Сначала выбери файл для импорта.', false);
+          return;
+        }
+
+        setRunningState(true);
+        setStatus('Импорт выполняется...');
+        setProgress(60);
+        clearResult();
+
+        google.script.run
+          .withSuccessHandler(function(result) {
+            setProgress(100);
+
+            if (result.ok) {
+              setStatus('Импорт завершён');
+              showResult(
+                'Файл: ' + result.fileName +
+                '\nЛист: ' + result.targetSheetName +
+                '\nСтрок обработано: ' + result.rows +
+                '\nСтолбцов обработано: ' + result.columns,
+                true
+              );
+            } else {
+              setStatus('Импорт завершился с ошибкой');
+              showResult(result.message, false);
+            }
+
+            setRunningState(false);
+          })
+          .withFailureHandler(function(error) {
+            setStatus('Ошибка импорта');
+            setProgress(100);
+            showResult(error.message || String(error), false);
+            setRunningState(false);
+          })
+          .importSelectedXlsxToInfo(selectedFileId);
+      }
+
+      function closeDialog() {
+        google.script.host.close();
+      }
+    </script>
+  </body>
+</html>
