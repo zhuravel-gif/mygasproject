@@ -1,7 +1,8 @@
 .clasp.json
 data/raw/*
-data/out/*
 !data/raw/.gitkeep
+!data/raw/orders.csv
+data/out/*
 !data/out/.gitkeep
 .venv/
 __pycache__/
