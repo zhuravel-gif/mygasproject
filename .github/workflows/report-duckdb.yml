@@ -2,7 +2,8 @@ name: Build report in DuckDB
 
 on:
   workflow_dispatch:
-
+  schedule:
+    - cron: "0 0 * * *"
 jobs:
   build-report:
     runs-on: ubuntu-latest

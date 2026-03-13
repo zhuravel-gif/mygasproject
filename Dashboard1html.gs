@@ -1,6 +1,17 @@
 function doGet(e) {
+  const page = dashboardHtmlResolvePage_(e);
+
+  if (page === 'dashboard2' && typeof dashboard2CreateTemplate_ === 'function') {
+    const dashboard2Template = dashboard2CreateTemplate_(e);
+
+    return dashboard2Template
+      .evaluate()
+      .setTitle('Dashboards')
+      .setXFrameOptionsMode(HtmlService.XFrameOptionsMode.ALLOWALL);
+  }
+
   const template = HtmlService.createTemplateFromFile('Dashboard1Window');
-  template.activePage = dashboardHtmlResolvePage_(e);
+  template.activePage = page === 'dashboard1' ? 'dashboard1' : 'dashboard1';
 
   return template
     .evaluate()

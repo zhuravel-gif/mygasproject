@@ -1,0 +1,1216 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <base target="_top">
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <style>
+      :root {
+        --bg: #f4f7fb;
+        --card: #ffffff;
+        --line: #d8e1eb;
+        --text: #1f2937;
+        --muted: #6b7280;
+        --blue: #17456b;
+        --blue2: #255f90;
+        --blueSoft: #e7f0fa;
+        --greenSoft: #e8f5e9;
+        --amberSoft: #fff4db;
+        --redSoft: #fde9e7;
+        --shadow: 0 8px 24px rgba(15, 23, 42, 0.08);
+
+        --sticky1: 150px;
+        --sticky2: 240px;
+        --sticky3: 90px;
+        --sticky4: 90px;
+      }
+
+      * { box-sizing: border-box; }
+      html, body { margin: 0; padding: 0; width: 100%; height: 100%; }
+      body {
+        font-family: Arial, sans-serif;
+        color: var(--text);
+        background: var(--bg);
+        overflow: hidden;
+      }
+
+      .app {
+        width: 100vw;
+        height: 100vh;
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+        padding: 10px;
+      }
+
+      .shell {
+        background: linear-gradient(135deg, var(--blue) 0%, var(--blue2) 100%);
+        color: #fff;
+        border-radius: 14px;
+        padding: 10px 14px;
+        box-shadow: var(--shadow);
+      }
+
+      .shell-top {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+        margin-bottom: 8px;
+      }
+
+      .title h1 {
+        margin: 0;
+        font-size: 18px;
+        line-height: 1.1;
+      }
+
+      .title p {
+        margin: 3px 0 0;
+        font-size: 11px;
+        opacity: .92;
+      }
+
+      .toolbar {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        flex-wrap: wrap;
+      }
+
+      .tabs {
+        display: flex;
+        gap: 8px;
+        flex-wrap: wrap;
+      }
+
+      .tab {
+        color: #fff;
+        text-decoration: none;
+        border: 1px solid rgba(255,255,255,.35);
+        padding: 6px 10px;
+        border-radius: 999px;
+        font-size: 12px;
+        line-height: 1;
+      }
+
+      .tab.active {
+        background: rgba(255,255,255,.18);
+        border-color: rgba(255,255,255,.55);
+        font-weight: 700;
+      }
+
+      .switch {
+        display: inline-flex;
+        padding: 2px;
+        background: rgba(255,255,255,.14);
+        border-radius: 999px;
+      }
+
+      .switch button {
+        border: 0;
+        background: transparent;
+        color: #fff;
+        padding: 6px 12px;
+        border-radius: 999px;
+        font-size: 12px;
+        font-weight: 700;
+        cursor: pointer;
+      }
+
+      .switch button.active {
+        background: #fff;
+        color: var(--blue);
+      }
+
+      .compact-toggle {
+        display: inline-flex;
+        gap: 2px;
+        padding: 2px;
+        background: rgba(255,255,255,.14);
+        border-radius: 999px;
+      }
+
+      .compact-toggle button {
+        border: 0;
+        background: transparent;
+        color: #fff;
+        padding: 6px 10px;
+        border-radius: 999px;
+        font-size: 12px;
+        font-weight: 700;
+        cursor: pointer;
+      }
+
+      .compact-toggle button.active {
+        background: #fff;
+        color: var(--blue);
+      }
+
+      .kpis {
+        display: grid;
+        grid-template-columns: 1.1fr 1.1fr 1fr 1fr 1fr;
+        gap: 10px;
+      }
+
+      .card {
+        background: var(--card);
+        border: 1px solid var(--line);
+        border-radius: 14px;
+        box-shadow: var(--shadow);
+      }
+
+      .kpi {
+        padding: 10px 12px;
+        min-height: 82px;
+      }
+
+      .kpi .label {
+        font-size: 11px;
+        color: var(--muted);
+        font-weight: 700;
+        margin-bottom: 4px;
+      }
+
+      .kpi .value {
+        font-size: 22px;
+        font-weight: 700;
+        line-height: 1.05;
+        margin-bottom: 4px;
+      }
+
+      .kpi .note {
+        font-size: 11px;
+        color: var(--muted);
+        line-height: 1.25;
+      }
+
+      .filters {
+        padding: 10px 12px;
+      }
+
+      .filters-grid {
+        display: grid;
+        grid-template-columns:
+          minmax(120px, 1fr)
+          minmax(120px, 1fr)
+          minmax(120px, 1fr)
+          minmax(120px, 1fr)
+          minmax(120px, 1fr)
+          minmax(100px, 110px)
+          minmax(120px, 130px)
+          minmax(220px, 1.6fr);
+        gap: 10px;
+        align-items: end;
+      }
+
+      .field {
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+        min-width: 0;
+      }
+
+      .field label {
+        font-size: 11px;
+        color: var(--muted);
+        font-weight: 700;
+      }
+
+      select, input[type="text"] {
+        width: 100%;
+        height: 34px;
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        padding: 8px 10px;
+        font-size: 12px;
+        background: #fff;
+        outline: none;
+      }
+
+      .chips {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        padding: 0 12px 12px;
+      }
+
+      .chip {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        padding: 5px 9px;
+        border-radius: 999px;
+        background: var(--blueSoft);
+        color: #204768;
+        font-size: 11px;
+        font-weight: 700;
+      }
+
+      .chip button {
+        border: 0;
+        background: transparent;
+        cursor: pointer;
+        font-size: 12px;
+        color: inherit;
+        padding: 0;
+      }
+
+      .content {
+        min-height: 0;
+        flex: 1 1 auto;
+        display: grid;
+        grid-template-columns: 320px minmax(0, 1fr);
+        gap: 10px;
+      }
+
+      .left-col, .right-col {
+        min-height: 0;
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+      }
+
+      .panel-title {
+        padding: 10px 12px 0;
+        font-size: 12px;
+        color: var(--muted);
+        font-weight: 700;
+      }
+
+      .summary-list {
+        padding: 8px 12px 12px;
+        overflow: auto;
+        min-height: 0;
+      }
+
+      .summary-row {
+        border: 1px solid var(--line);
+        border-radius: 10px;
+        padding: 9px 10px;
+        margin-bottom: 8px;
+        background: #fff;
+      }
+
+      .summary-row .row-top {
+        display: flex;
+        justify-content: space-between;
+        gap: 10px;
+        margin-bottom: 6px;
+        align-items: center;
+      }
+
+      .summary-row .brand {
+        font-size: 12px;
+        font-weight: 700;
+        color: #1f3751;
+      }
+
+      .summary-row .metrics {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 8px;
+        font-size: 11px;
+      }
+
+      .metric-box {
+        background: #f8fbff;
+        border: 1px solid #e5edf6;
+        border-radius: 8px;
+        padding: 6px 7px;
+      }
+
+      .metric-box .m-label {
+        color: var(--muted);
+        margin-bottom: 2px;
+      }
+
+      .metric-box .m-value {
+        font-weight: 700;
+      }
+
+      .table-card {
+        min-height: 0;
+        display: flex;
+        flex-direction: column;
+      }
+
+      .table-actions {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 8px;
+        padding: 10px 12px;
+        border-bottom: 1px solid var(--line);
+      }
+
+      .table-actions-left, .table-actions-right {
+        display: flex;
+        gap: 8px;
+        align-items: center;
+        flex-wrap: wrap;
+      }
+
+      .btn {
+        border: 1px solid var(--line);
+        background: #fff;
+        color: var(--text);
+        border-radius: 8px;
+        padding: 7px 10px;
+        font-size: 12px;
+        font-weight: 700;
+        cursor: pointer;
+      }
+
+      .btn.primary {
+        background: var(--blueSoft);
+        color: #204768;
+      }
+
+      .table-wrap {
+        min-height: 0;
+        flex: 1 1 auto;
+        overflow: auto;
+      }
+
+      table {
+        width: 100%;
+        border-collapse: separate;
+        border-spacing: 0;
+        font-size: 11px;
+        table-layout: fixed;
+      }
+
+      thead th {
+        position: sticky;
+        top: 0;
+        z-index: 20;
+        border-bottom: 1px solid var(--line);
+        border-right: 1px solid var(--line);
+        padding: 8px 6px;
+        text-align: center;
+        white-space: normal;
+        line-height: 1.15;
+        color: #16324f;
+        background: #eef4fb;
+      }
+
+      tbody td {
+        border-bottom: 1px solid #edf2f7;
+        border-right: 1px solid #edf2f7;
+        padding: 7px 6px;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        background: #fff;
+      }
+
+      tbody tr:hover td {
+        background: #f8fbff;
+      }
+
+      .sticky-1, .sticky-2, .sticky-3, .sticky-4, .sticky-last {
+        position: sticky;
+        z-index: 8;
+        background: inherit;
+        background-clip: padding-box;
+      }
+
+      .sticky-1::after, .sticky-2::after, .sticky-3::after, .sticky-4::after {
+        content: "";
+        position: absolute;
+        top: 0;
+        right: -1px;
+        width: 1px;
+        height: 100%;
+        background: var(--line);
+      }
+
+      .sticky-1 {
+        left: 0;
+        width: var(--sticky1);
+        min-width: var(--sticky1);
+        max-width: var(--sticky1);
+      }
+
+      .sticky-2 {
+        left: var(--sticky1);
+        width: var(--sticky2);
+        min-width: var(--sticky2);
+        max-width: var(--sticky2);
+      }
+
+      .sticky-3 {
+        left: calc(var(--sticky1) + var(--sticky2));
+        width: var(--sticky3);
+        min-width: var(--sticky3);
+        max-width: var(--sticky3);
+      }
+
+      .sticky-4 {
+        left: calc(var(--sticky1) + var(--sticky2) + var(--sticky3));
+        width: var(--sticky4);
+        min-width: var(--sticky4);
+        max-width: var(--sticky4);
+      }
+
+      .sticky-last {
+        right: 0;
+        z-index: 9;
+        background: #fff;
+        box-shadow: -8px 0 10px rgba(15, 23, 42, 0.06);
+      }
+
+      thead .sticky-1, thead .sticky-2, thead .sticky-3, thead .sticky-4, thead .sticky-last {
+        z-index: 21;
+      }
+
+      .head-core { background: #dcecfb; }
+      .head-supply { background: #f8d7da; }
+      .head-stock { background: #d9ead3; }
+      .head-default { background: #eef4fb; }
+
+      .group-row td {
+        background: #f4f8fc !important;
+        font-weight: 700;
+        color: #24415e;
+      }
+
+      .group-toggle {
+        cursor: pointer;
+        user-select: none;
+      }
+
+      .indent-1 { padding-left: 10px !important; }
+      .indent-2 { padding-left: 22px !important; }
+      .indent-3 { padding-left: 34px !important; }
+      .indent-4 { padding-left: 46px !important; }
+
+      .num { text-align: right; }
+      .muted { color: var(--muted); }
+
+      .spark {
+        display: flex;
+        align-items: flex-end;
+        gap: 1px;
+        height: 22px;
+      }
+
+      .spark span {
+        flex: 1 1 auto;
+        min-width: 2px;
+        border-radius: 2px 2px 0 0;
+        background: #5b8db8;
+      }
+
+      .badge {
+        display: inline-block;
+        min-width: 46px;
+        text-align: center;
+        border-radius: 999px;
+        padding: 3px 7px;
+        font-weight: 700;
+      }
+
+      .badge.ok { background: var(--greenSoft); color: #256029; }
+      .badge.warn { background: var(--amberSoft); color: #8d6b00; }
+      .badge.risk { background: var(--redSoft); color: #b93d2b; }
+
+      .summary-bar {
+        display: grid;
+        grid-template-columns: 1.2fr 1fr 1fr 1fr 1fr;
+        gap: 8px;
+        padding: 10px 12px;
+        border-bottom: 1px solid var(--line);
+        background: #f9fbfe;
+      }
+
+      .summary-bar .s-item {
+        border: 1px solid #e4ebf3;
+        border-radius: 10px;
+        padding: 7px 8px;
+        background: #fff;
+      }
+
+      .summary-bar .s-label {
+        font-size: 10px;
+        color: var(--muted);
+        margin-bottom: 2px;
+      }
+
+      .summary-bar .s-value {
+        font-size: 12px;
+        font-weight: 700;
+      }
+
+      .loading, .empty {
+        padding: 30px 18px;
+        text-align: center;
+        color: var(--muted);
+      }
+
+      .density-compact table { font-size: 10px; }
+      .density-compact tbody td { padding: 5px 5px; }
+      .density-compact thead th { padding: 6px 5px; }
+
+      .density-comfort table { font-size: 12px; }
+      .density-comfort tbody td { padding: 9px 7px; }
+      .density-comfort thead th { padding: 9px 7px; }
+
+      .w-60 { width: 60px; min-width: 60px; max-width: 60px; }
+      .w-65 { width: 65px; min-width: 65px; max-width: 65px; }
+      .w-70 { width: 70px; min-width: 70px; max-width: 70px; }
+      .w-75 { width: 75px; min-width: 75px; max-width: 75px; }
+      .w-80 { width: 80px; min-width: 80px; max-width: 80px; }
+      .w-85 { width: 85px; min-width: 85px; max-width: 85px; }
+      .w-95 { width: 95px; min-width: 95px; max-width: 95px; }
+      .w-100 { width: 100px; min-width: 100px; max-width: 100px; }
+
+      @media (max-width: 1450px) {
+        .kpis { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+        .content { grid-template-columns: 1fr; }
+      }
+
+      @media (max-width: 980px) {
+        .filters-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="app">
+      <div class="shell">
+        <div class="shell-top">
+          <div class="title">
+            <h1>Dashboard2</h1>
+            <p id="metaText">Подготовка данных…</p>
+          </div>
+
+          <div class="toolbar">
+            <div class="tabs">
+              <a class="tab" href="<?= dashboard1Url ?>">Dashboard1</a>
+              <a class="tab active" href="<?= dashboard2Url ?>">Dashboard2</a>
+            </div>
+
+            <div class="switch">
+              <button id="mode14Btn" class="active" type="button" onclick="setMode('14')">14 дней</button>
+              <button id="mode30Btn" type="button" onclick="setMode('30')">30 дней</button>
+            </div>
+
+            <div class="compact-toggle">
+              <button id="densityCompactBtn" type="button" onclick="setDensity('compact')">Плотно</button>
+              <button id="densityStandardBtn" class="active" type="button" onclick="setDensity('standard')">Стандарт</button>
+              <button id="densityComfortBtn" type="button" onclick="setDensity('comfort')">Комфортно</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="kpis" id="kpiRoot"></div>
+
+      <div class="card filters">
+        <div class="filters-grid">
+          <div class="field">
+            <label>Категория</label>
+            <select id="filterCat"></select>
+          </div>
+          <div class="field">
+            <label>Бренд</label>
+            <select id="filterBrand"></select>
+          </div>
+          <div class="field">
+            <label>Товарная группа 1</label>
+            <select id="filterTg1"></select>
+          </div>
+          <div class="field">
+            <label>Товарная группа 2</label>
+            <select id="filterTg2"></select>
+          </div>
+          <div class="field">
+            <label>Товарная группа 3</label>
+            <select id="filterTg3"></select>
+          </div>
+          <div class="field">
+            <label>Запас &lt; 30</label>
+            <select id="filterZapas30">
+              <option value="">Все</option>
+              <option value="Да">Да</option>
+            </select>
+          </div>
+          <div class="field">
+            <label>Риск &lt; 7 дней</label>
+            <select id="filterRisk7">
+              <option value="">Все</option>
+              <option value="Да">Да</option>
+            </select>
+          </div>
+          <div class="field">
+            <label>Поиск</label>
+            <input id="searchText" type="text" placeholder="Наименование, артикул, бренд…" />
+          </div>
+        </div>
+      </div>
+
+      <div class="chips" id="chipsRoot"></div>
+
+      <div class="content">
+        <div class="left-col">
+          <div class="card" style="min-height:0; flex:1 1 auto; display:flex; flex-direction:column;">
+            <div class="panel-title">Сводка по брендам</div>
+            <div class="summary-list" id="brandSummary"></div>
+          </div>
+        </div>
+
+        <div class="right-col">
+          <div class="card table-card" id="tableCard">
+            <div class="table-actions">
+              <div class="table-actions-left">
+                <button class="btn primary" type="button" onclick="expandAll()">Раскрыть всё</button>
+                <button class="btn" type="button" onclick="collapseAll()">Свернуть всё</button>
+                <button class="btn" type="button" onclick="expandToLevel(1)">До tg1</button>
+                <button class="btn" type="button" onclick="expandToLevel(2)">До tg2</button>
+                <button class="btn" type="button" onclick="expandToLevel(3)">До tg3</button>
+              </div>
+              <div class="table-actions-right">
+                <button class="btn" type="button" onclick="resetFilters()">Сбросить фильтры</button>
+              </div>
+            </div>
+
+            <div class="summary-bar" id="summaryBar"></div>
+
+            <div class="table-wrap">
+              <div id="loading" class="loading">Загрузка Dashboard2…</div>
+              <table id="dataTable" style="display:none;">
+                <thead>
+                  <tr id="tableHeadRow"></tr>
+                </thead>
+                <tbody id="tableBody"></tbody>
+              </table>
+              <div id="empty" class="empty" style="display:none;">Нет строк по выбранным фильтрам.</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      let rawData = null;
+      let currentMode = '14';
+      let currentDensity = 'standard';
+      let expanded = new Set(['root']);
+      let searchDebounce = null;
+
+      const columns = [
+        { key: 'hierarchy', label: 'Иерархия', cls: 'sticky-1', help: 'Уровень группировки: Бренд → Группа 1 → Группа 2 → Группа 3 → SKU.' },
+        { key: 'nom', label: 'Наименование', cls: 'sticky-2', help: 'Источник: report → Наименование.' },
+        { key: 'art1C', label: 'Артикул', cls: 'sticky-3', help: 'Источник: report → Артикул.' },
+        { key: 'artwb', label: 'Артикул WB', cls: 'sticky-4', help: 'Источник: report → Артикул ВБ.' },
+        { key: 'cat', label: 'Категория', cls: 'w-95', help: 'Источник: report → Категория товаров.' },
+        { key: 'order', label: 'Заказано\nпоставщику', cls: 'num w-75', help: 'Источник: report → Заказано поставщику.' },
+        { key: 'inwork', label: 'В\nпроизводстве', cls: 'num w-75', help: 'Источник: report → В производстве.' },
+        { key: 'rawstock', label: 'Остаток\nсырья', cls: 'num w-70', help: 'Источник: report → Остаток сырья в шт.' },
+        { key: 'stock', label: 'Готовая\nпродукция', cls: 'num w-75', help: 'Источник: report → Готовая продукция на складе.' },
+        { key: 'reserved', label: 'В\nрезерве', cls: 'num w-65', help: 'Источник: report → В резерве.' },
+        { key: 'shipped', label: 'Отгружено\nна РВБ', cls: 'num w-75', help: 'Источник: report → Отгружено на РВБ.' },
+        { key: 'fbostock', label: 'ФБО\nостаток', cls: 'num w-70', help: 'Источник: report → ФБО остаток.' },
+        { key: 'ordersFBO', label14: 'Заказы\nFBO 14д', label30: 'Заказы\nFBO 30д', cls: 'num w-70', help14: 'Источник: report → ordersFBO.', help30: 'Источник: report → ordersFBO30.' },
+        { key: 'ordersFBS', label14: 'Заказы\nFBS 14д', label30: 'Заказы\nFBS 30д', cls: 'num w-70', help14: 'Источник: report → ordersFBS.', help30: 'Источник: report → ordersFBS30.' },
+        { key: 'orderssum', label14: 'Заказы\nвсего 14д', label30: 'Заказы\nвсего 30д', cls: 'num w-70', help14: 'Источник: report → orderssum.', help30: 'Источник: report → orderssum30.' },
+        { key: 'trend', label14: 'Тренд 14д', label30: 'Тренд 30д', cls: 'w-80', help14: 'Источник: report → trend14d.', help30: 'Источник: report → trend30d.' },
+        { key: 'sumstock', label: 'Суммарный\nостаток', cls: 'num w-75', help: 'Источник: report → sumstock.' },
+        { key: 'dayorders', label14: 'Продажи/\nдень 14д', label30: 'Продажи/\nдень 30д', cls: 'num w-85', help14: 'Источник: report → dayorders.', help30: 'Источник: report → dayorders30.' },
+        { key: 'zapas', label14: 'Запас,\nдней 14д', label30: 'Запас,\nдней 30д', cls: 'num w-85 sticky-last', help14: 'Показывает, на сколько дней хватит текущего остатка при текущем темпе продаж.', help30: 'Показывает, на сколько дней хватит текущего остатка при текущем темпе продаж.' }
+      ];
+
+      document.addEventListener('DOMContentLoaded', function() {
+        renderHead();
+        bindEvents();
+        loadData();
+      });
+
+      function bindEvents() {
+        ['filterCat','filterBrand','filterTg1','filterTg2','filterTg3','filterZapas30','filterRisk7'].forEach(function(id) {
+          const el = document.getElementById(id);
+          el.addEventListener('change', render);
+        });
+
+        document.getElementById('searchText').addEventListener('input', function() {
+          clearTimeout(searchDebounce);
+          searchDebounce = setTimeout(render, 180);
+        });
+
+        document.getElementById('tableBody').addEventListener('click', function(event) {
+          const toggle = event.target.closest('[data-group-id]');
+          if (!toggle) return;
+          const groupId = toggle.dataset.groupId;
+          if (expanded.has(groupId)) expanded.delete(groupId);
+          else expanded.add(groupId);
+          render();
+        });
+      }
+
+      function loadData() {
+        google.script.run
+          .withSuccessHandler(initDashboard)
+          .withFailureHandler(showError)
+          .getDashboard2HtmlData();
+      }
+
+      function initDashboard(data) {
+        rawData = data;
+        document.getElementById('metaText').textContent =
+          'Источник: report · Обновлено: ' + data.generatedAt + ' · BI-версия Dashboard2';
+
+        fillSelect('filterCat', data.filters.cat, 'Все категории');
+        fillSelect('filterBrand', data.filters.brandinfo, 'Все бренды');
+        fillSelect('filterTg1', data.filters.tg1, 'Все группы 1');
+        fillSelect('filterTg2', data.filters.tg2, 'Все группы 2');
+        fillSelect('filterTg3', data.filters.tg3, 'Все группы 3');
+
+        render();
+      }
+
+      function showError(error) {
+        const msg = error && error.message ? error.message : String(error);
+        document.getElementById('loading').textContent = msg;
+        document.getElementById('loading').style.display = 'block';
+        document.getElementById('dataTable').style.display = 'none';
+      }
+
+      function setMode(mode) {
+        currentMode = mode === '30' ? '30' : '14';
+        document.getElementById('mode14Btn').classList.toggle('active', currentMode === '14');
+        document.getElementById('mode30Btn').classList.toggle('active', currentMode === '30');
+        renderHead();
+        render();
+      }
+
+      function setDensity(density) {
+        currentDensity = density;
+        document.getElementById('densityCompactBtn').classList.toggle('active', density === 'compact');
+        document.getElementById('densityStandardBtn').classList.toggle('active', density === 'standard');
+        document.getElementById('densityComfortBtn').classList.toggle('active', density === 'comfort');
+
+        const tableCard = document.getElementById('tableCard');
+        tableCard.classList.remove('density-compact', 'density-comfort');
+        if (density === 'compact') tableCard.classList.add('density-compact');
+        if (density === 'comfort') tableCard.classList.add('density-comfort');
+      }
+
+      function resetFilters() {
+        ['filterCat','filterBrand','filterTg1','filterTg2','filterTg3','filterZapas30','filterRisk7','searchText'].forEach(function(id) {
+          document.getElementById(id).value = '';
+        });
+        render();
+      }
+
+      function fillSelect(id, values, placeholder) {
+        const el = document.getElementById(id);
+        el.innerHTML = '<option value="">' + escapeHtml(placeholder) + '</option>' +
+          values.map(function(v) {
+            return '<option value="' + escapeHtml(v) + '">' + escapeHtml(v) + '</option>';
+          }).join('');
+      }
+
+      function render() {
+        if (!rawData || !rawData.rows) return;
+
+        const rows = applyFilters(rawData.rows);
+        const summary = summarizeRows(rows);
+        const groupSummary = buildBrandSummary(rows);
+        const tree = buildTree(rows);
+
+        renderKpis(summary);
+        renderActiveChips();
+        renderSummaryBar(summary);
+        renderBrandSummary(groupSummary);
+
+        const tbody = document.getElementById('tableBody');
+        tbody.innerHTML = buildTreeHtml(tree, 0, 'root');
+
+        document.getElementById('loading').style.display = 'none';
+        document.getElementById('dataTable').style.display = rows.length ? 'table' : 'none';
+        document.getElementById('empty').style.display = rows.length ? 'none' : 'block';
+      }
+
+      function renderHead() {
+        const row = document.getElementById('tableHeadRow');
+        row.innerHTML = columns.map(function(col) {
+          const label = currentMode === '30' ? (col.label30 || col.label) : (col.label14 || col.label);
+          const help = currentMode === '30' ? (col.help30 || col.help) : (col.help14 || col.help);
+          const extraClass = getHeaderGroupClass(col.key);
+          return '<th class="' + [col.cls || '', extraClass].join(' ').trim() + '" title="' + escapeHtml(help || '') + '">' +
+            String(label || '').replace(/\n/g, '<br>') +
+            '</th>';
+        }).join('');
+      }
+
+      function getHeaderGroupClass(key) {
+        const core = ['hierarchy', 'nom', 'art1C', 'artwb', 'cat'];
+        const supply = ['order', 'inwork', 'rawstock'];
+        const stock = ['stock', 'reserved', 'shipped', 'fbostock'];
+
+        if (core.indexOf(key) >= 0) return 'head-core';
+        if (supply.indexOf(key) >= 0) return 'head-supply';
+        if (stock.indexOf(key) >= 0) return 'head-stock';
+        return 'head-default';
+      }
+
+      function applyFilters(rows) {
+        const cat = document.getElementById('filterCat').value;
+        const brand = document.getElementById('filterBrand').value;
+        const tg1 = document.getElementById('filterTg1').value;
+        const tg2 = document.getElementById('filterTg2').value;
+        const tg3 = document.getElementById('filterTg3').value;
+        const zapas30 = document.getElementById('filterZapas30').value;
+        const risk7 = document.getElementById('filterRisk7').value;
+        const search = document.getElementById('searchText').value.trim().toLowerCase();
+
+        return rows.filter(function(r) {
+          const zapas = currentMode === '30' ? r.zapas30 : r.zapas14;
+          const zapasFlag = currentMode === '30' ? r.zapasFlag30 : r.zapasFlag14;
+          const riskFlag = zapas !== null && Number(zapas) < 7 ? 'Да' : 'Нет';
+
+          if (cat && r.cat !== cat) return false;
+          if (brand && r.brandinfo !== brand) return false;
+          if (tg1 && r.tg1 !== tg1) return false;
+          if (tg2 && r.tg2 !== tg2) return false;
+          if (tg3 && r.tg3 !== tg3) return false;
+          if (zapas30 && zapasFlag !== zapas30) return false;
+          if (risk7 && riskFlag !== risk7) return false;
+          if (search && String(r.searchText || '').indexOf(search) === -1) return false;
+
+          return true;
+        });
+      }
+
+      function summarizeRows(rows) {
+        const summary = {
+          totalSku: 0,
+          turnoverSku: 0,
+          sumstock: 0,
+          totalDayorders: 0,
+          turnover: null,
+          lowStockSku: 0,
+          riskSku: 0,
+          supplyNeedSku: 0
+        };
+
+        rows.forEach(function(row) {
+          const dayorders = currentMode === '30' ? row.dayorders30 : row.dayorders14;
+          const zapas = currentMode === '30' ? row.zapas30 : row.zapas14;
+
+          summary.totalSku += 1;
+          summary.sumstock += Number(row.sumstock || 0);
+
+          if (dayorders !== null && Number(dayorders) > 0) {
+            summary.turnoverSku += 1;
+            summary.totalDayorders += Number(dayorders);
+          }
+
+          if (zapas !== null && Number(zapas) < 30) summary.lowStockSku += 1;
+          if (zapas !== null && Number(zapas) < 7) summary.riskSku += 1;
+          if ((Number(row.order || 0) + Number(row.inwork || 0)) > 0) summary.supplyNeedSku += 1;
+        });
+
+        summary.turnover = summary.totalDayorders > 0 ? summary.sumstock / summary.totalDayorders : null;
+        return summary;
+      }
+
+      function buildBrandSummary(rows) {
+        const map = {};
+
+        rows.forEach(function(row) {
+          const key = row.brandinfo || 'Без бренда';
+          if (!map[key]) {
+            map[key] = {
+              brandinfo: key,
+              totalSku: 0,
+              sumstock: 0,
+              totalDayorders: 0,
+              turnover: null,
+              lowStockSku: 0,
+              riskSku: 0,
+              orderssum: 0
+            };
+          }
+
+          const dayorders = currentMode === '30' ? row.dayorders30 : row.dayorders14;
+          const zapas = currentMode === '30' ? row.zapas30 : row.zapas14;
+          const orderssum = currentMode === '30' ? row.orderssum30 : row.orderssum14;
+
+          map[key].totalSku += 1;
+          map[key].sumstock += Number(row.sumstock || 0);
+          map[key].orderssum += Number(orderssum || 0);
+
+          if (dayorders !== null && Number(dayorders) > 0) {
+            map[key].totalDayorders += Number(dayorders);
+          }
+
+          if (zapas !== null && Number(zapas) < 30) map[key].lowStockSku += 1;
+          if (zapas !== null && Number(zapas) < 7) map[key].riskSku += 1;
+        });
+
+        return Object.keys(map).sort(function(a, b) {
+          return a.localeCompare(b, 'ru');
+        }).map(function(key) {
+          const item = map[key];
+          item.turnover = item.totalDayorders > 0 ? item.sumstock / item.totalDayorders : null;
+          return item;
+        });
+      }
+
+      function renderKpis(summary) {
+        document.getElementById('kpiRoot').innerHTML = [
+          createKpiCard('Turnover, дней', fmtFloat(summary.turnover), 'На сколько дней хватит текущего остатка при текущем темпе продаж по выбранным фильтрам.'),
+          createKpiCard('Суммарный остаток', fmtInt(summary.sumstock), 'Сумма sumstock по текущей выборке.'),
+          createKpiCard('Уходимость, шт/день', fmtFloat(summary.totalDayorders), 'Сумма средних продаж в день по выборке.'),
+          createKpiCard('SKU с запасом < 30', fmtInt(summary.lowStockSku), 'Количество SKU с низким запасом.'),
+          createKpiCard('SKU риск < 7 дней', fmtInt(summary.riskSku), 'Самые дефицитные позиции по текущему темпу продаж.')
+        ].join('');
+      }
+
+      function createKpiCard(label, value, note) {
+        return '<div class="card kpi">' +
+          '<div class="label">' + escapeHtml(label) + '</div>' +
+          '<div class="value">' + escapeHtml(value) + '</div>' +
+          '<div class="note">' + escapeHtml(note) + '</div>' +
+        '</div>';
+      }
+
+      function renderSummaryBar(summary) {
+        document.getElementById('summaryBar').innerHTML =
+          summaryItem('SKU', fmtInt(summary.totalSku)) +
+          summaryItem('Turnover SKU', fmtInt(summary.turnoverSku)) +
+          summaryItem('Поставка / производство', fmtInt(summary.supplyNeedSku)) +
+          summaryItem('Риск < 7 дней', fmtInt(summary.riskSku)) +
+          summaryItem('Низкий запас < 30', fmtInt(summary.lowStockSku));
+      }
+
+      function summaryItem(label, value) {
+        return '<div class="s-item"><div class="s-label">' + escapeHtml(label) + '</div><div class="s-value">' + escapeHtml(value) + '</div></div>';
+      }
+
+      function renderBrandSummary(items) {
+        const root = document.getElementById('brandSummary');
+        root.innerHTML = items.map(function(item) {
+          return '<div class="summary-row">' +
+            '<div class="row-top">' +
+              '<div class="brand">' + escapeHtml(item.brandinfo) + '</div>' +
+              '<div>' + renderZapas(item.turnover) + '</div>' +
+            '</div>' +
+            '<div class="metrics">' +
+              metricBox('SKU', fmtInt(item.totalSku)) +
+              metricBox('Заказы', fmtInt(item.orderssum)) +
+              metricBox('Остаток', fmtInt(item.sumstock)) +
+              metricBox('Продажи/день', fmtFloat(item.totalDayorders)) +
+              metricBox('Запас < 30', fmtInt(item.lowStockSku)) +
+              metricBox('Риск < 7', fmtInt(item.riskSku)) +
+            '</div>' +
+          '</div>';
+        }).join('');
+      }
+
+      function metricBox(label, value) {
+        return '<div class="metric-box"><div class="m-label">' + escapeHtml(label) + '</div><div class="m-value">' + escapeHtml(value) + '</div></div>';
+      }
+
+      function renderActiveChips() {
+        const defs = [
+          ['Категория', 'filterCat'],
+          ['Бренд', 'filterBrand'],
+          ['Гр.1', 'filterTg1'],
+          ['Гр.2', 'filterTg2'],
+          ['Гр.3', 'filterTg3'],
+          ['Запас < 30', 'filterZapas30'],
+          ['Риск < 7', 'filterRisk7'],
+          ['Поиск', 'searchText']
+        ];
+
+        const chips = defs.map(function(item) {
+          const label = item[0];
+          const id = item[1];
+          const el = document.getElementById(id);
+          const value = (el.value || '').trim();
+          if (!value) return '';
+          return '<div class="chip">' +
+            '<span>' + escapeHtml(label + ': ' + value) + '</span>' +
+            '<button type="button" onclick="clearFilter(\'' + id + '\')">×</button>' +
+          '</div>';
+        }).filter(Boolean).join('');
+
+        document.getElementById('chipsRoot').innerHTML = chips;
+      }
+
+      function clearFilter(id) {
+        document.getElementById(id).value = '';
+        render();
+      }
+
+      function buildTree(rows) {
+        const root = {};
+
+        rows.forEach(function(row) {
+          const brand = row.brandinfo || 'Без бренда';
+          const tg1 = row.tg1 || 'Без группы 1';
+          const tg2 = row.tg2 || 'Без группы 2';
+          const tg3 = row.tg3 || 'Без группы 3';
+
+          root[brand] ||= {};
+          root[brand][tg1] ||= {};
+          root[brand][tg1][tg2] ||= {};
+          root[brand][tg1][tg2][tg3] ||= [];
+          root[brand][tg1][tg2][tg3].push(row);
+        });
+
+        return root;
+      }
+
+      function buildTreeHtml(tree, depth, path) {
+        return Object.keys(tree).map(function(key) {
+          const node = tree[key];
+          const groupId = path + '__' + key;
+          const isLeafArray = Array.isArray(node);
+          const isOpen = expanded.has(groupId);
+
+          if (isLeafArray) {
+            if (!expanded.has(path)) return '';
+            return node.map(renderDataRowHtml).join('');
+          }
+
+          const groupRows = flattenNodeRows(node);
+          const groupSummary = summarizeRows(groupRows);
+          const label = key + ' · SKU: ' + fmtInt(groupSummary.totalSku) + ' · Остаток: ' + fmtInt(groupSummary.sumstock) + ' · Turnover: ' + fmtFloat(groupSummary.turnover);
+
+          const groupHtml =
+            '<tr class="group-row">' +
+              '<td colspan="' + columns.length + '" class="group-toggle indent-' + Math.min(depth + 1, 4) + '" data-group-id="' + escapeHtml(groupId) + '">' +
+                (isOpen ? '▾ ' : '▸ ') + escapeHtml(label) +
+              '</td>' +
+            '</tr>';
+
+          const childrenHtml = isOpen ? buildTreeHtml(node, depth + 1, groupId) : '';
+          return groupHtml + childrenHtml;
+        }).join('');
+      }
+
+      function flattenNodeRows(node) {
+        if (Array.isArray(node)) return node;
+        let result = [];
+        Object.keys(node).forEach(function(key) {
+          result = result.concat(flattenNodeRows(node[key]));
+        });
+        return result;
+      }
+
+      function renderDataRowHtml(r) {
+        const ordersFBO = currentMode === '30' ? r.ordersFBO30 : r.ordersFBO14;
+        const ordersFBS = currentMode === '30' ? r.ordersFBS30 : r.ordersFBS14;
+        const orderssum = currentMode === '30' ? r.orderssum30 : r.orderssum14;
+        const trend = currentMode === '30' ? r.trend30d : r.trend14d;
+        const dayorders = currentMode === '30' ? r.dayorders30 : r.dayorders14;
+        const zapas = currentMode === '30' ? r.zapas30 : r.zapas14;
+
+        return '<tr>' +
+          '<td class="sticky-1 muted">SKU</td>' +
+          '<td class="sticky-2" title="' + escapeHtml(r.nom || '') + '">' + escapeHtml(r.nom || '') + '</td>' +
+          '<td class="sticky-3">' + escapeHtml(r.art1C || '') + '</td>' +
+          '<td class="sticky-4">' + escapeHtml(r.artwb || '') + '</td>' +
+          '<td class="w-95" title="' + escapeHtml(r.cat || '') + '">' + escapeHtml(r.cat || '') + '</td>' +
+          '<td class="num w-75">' + fmtInt(r.order) + '</td>' +
+          '<td class="num w-75">' + fmtInt(r.inwork) + '</td>' +
+          '<td class="num w-70">' + fmtInt(r.rawstock) + '</td>' +
+          '<td class="num w-75">' + fmtInt(r.stock) + '</td>' +
+          '<td class="num w-65">' + fmtInt(r.reserved) + '</td>' +
+          '<td class="num w-75">' + fmtInt(r.shipped) + '</td>' +
+          '<td class="num w-70">' + fmtInt(r.fbostock) + '</td>' +
+          '<td class="num w-70">' + fmtInt(ordersFBO) + '</td>' +
+          '<td class="num w-70">' + fmtInt(ordersFBS) + '</td>' +
+          '<td class="num w-70">' + fmtInt(orderssum) + '</td>' +
+          '<td class="w-80">' + renderSpark(trend) + '</td>' +
+          '<td class="num w-75">' + fmtInt(r.sumstock) + '</td>' +
+          '<td class="num w-85">' + fmtFloat(dayorders) + '</td>' +
+          '<td class="num w-85 sticky-last">' + renderZapas(zapas) + '</td>' +
+        '</tr>';
+      }
+
+      function renderSpark(series) {
+        const arr = Array.isArray(series) ? series : [];
+        const max = Math.max.apply(null, arr.concat([1]));
+        return '<div class="spark">' + arr.map(function(v) {
+          const h = Math.max(3, Math.round((v / max) * 20));
+          return '<span style="height:' + h + 'px"></span>';
+        }).join('') + '</div>';
+      }
+
+      function renderZapas(value) {
+        if (value === null || value === '' || Number.isNaN(Number(value))) return '<span class="muted">—</span>';
+        const num = Number(value);
+        const text = fmtFloat(num);
+        if (num < 7) return '<span class="badge risk">' + text + '</span>';
+        if (num < 30) return '<span class="badge warn">' + text + '</span>';
+        return '<span class="badge ok">' + text + '</span>';
+      }
+
+      function expandAll() {
+        const rows = applyFilters(rawData.rows);
+        const tree = buildTree(rows);
+        expanded = new Set(['root']);
+        collectGroupIds(tree, 'root', expanded);
+        render();
+      }
+
+      function collapseAll() {
+        expanded = new Set(['root']);
+        render();
+      }
+
+      function expandToLevel(level) {
+        const rows = applyFilters(rawData.rows);
+        const tree = buildTree(rows);
+        expanded = new Set(['root']);
+        collectGroupIdsToLevel(tree, 'root', 0, level, expanded);
+        render();
+      }
+
+      function collectGroupIds(tree, path, target) {
+        Object.keys(tree).forEach(function(key) {
+          const node = tree[key];
+          const groupId = path + '__' + key;
+          if (!Array.isArray(node)) {
+            target.add(groupId);
+            collectGroupIds(node, groupId, target);
+          }
+        });
+      }
+
+      function collectGroupIdsToLevel(tree, path, depth, maxDepth, target) {
+        Object.keys(tree).forEach(function(key) {
+          const node = tree[key];
+          const groupId = path + '__' + key;
+          if (!Array.isArray(node) && depth < maxDepth) {
+            target.add(groupId);
+            collectGroupIdsToLevel(node, groupId, depth + 1, maxDepth, target);
+          }
+        });
+      }
+
+      function fmtInt(v) {
+        return new Intl.NumberFormat('ru-RU', { maximumFractionDigits: 0 }).format(Number(v || 0));
+      }
+
+      function fmtFloat(v) {
+        if (v === null || v === '' || Number.isNaN(Number(v))) return '—';
+        return new Intl.NumberFormat('ru-RU', { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(Number(v));
+      }
+
+      function escapeHtml(str) {
+        return String(str)
+          .replaceAll('&', '&amp;')
+          .replaceAll('<', '&lt;')
+          .replaceAll('>', '&gt;')
+          .replaceAll('"', '&quot;')
+          .replaceAll("'", '&#039;');
+      }
+    </script>
+  </body>
+</html>
