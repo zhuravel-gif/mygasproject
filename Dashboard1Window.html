@@ -3,6 +3,7 @@
   <head>
     <base target="_top">
     <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
     <style>
       :root {
         --bg: #f6f8fb;
@@ -11,6 +12,7 @@
         --text: #1f2937;
         --muted: #667085;
         --blue: #1f4e78;
+        --blue-2: #2f6b9a;
         --blue-soft: #eaf2fb;
         --green-soft: #e8f5e9;
         --amber-soft: #fff4db;
@@ -22,145 +24,174 @@
 
       * { box-sizing: border-box; }
 
-      body {
+      html, body {
         margin: 0;
+        padding: 0;
+        width: 100%;
+        height: 100%;
+      }
+
+      body {
         font-family: Arial, sans-serif;
         background: var(--bg);
         color: var(--text);
-      }
-
-      .app {
-        padding: 14px;
-      }
-
-      .topbar {
-        background: linear-gradient(135deg, #1f4e78 0%, #2f6b9a 100%);
-        color: #fff;
-        border-radius: 16px;
-        padding: 14px 18px 16px;
-        box-shadow: var(--shadow);
-        margin-bottom: 14px;
-      }
-
-      .statusbar {
-        display: grid;
-        grid-template-columns: 1fr auto;
-        gap: 12px;
-        align-items: center;
-        margin-bottom: 12px;
-      }
-
-      .status-meta {
-        display: flex;
-        align-items: center;
-        gap: 10px;
-        font-size: 12px;
-        opacity: 0.95;
-      }
-
-      .status-dot {
-        width: 9px;
-        height: 9px;
-        border-radius: 50%;
-        background: #d4e7fb;
-        box-shadow: 0 0 0 4px rgba(255,255,255,0.15);
-      }
-
-      .progress {
-        width: 100%;
-        height: 8px;
-        background: rgba(255,255,255,0.18);
-        border-radius: 999px;
         overflow: hidden;
       }
 
-      .progress-bar {
-        height: 100%;
-        width: 0%;
-        background: linear-gradient(90deg, #ffffff 0%, #d7ecff 100%);
-        border-radius: 999px;
-        transition: width 0.2s ease;
+      .app {
+        width: 100vw;
+        height: 100vh;
+        display: flex;
+        flex-direction: column;
+        padding: 16px;
+        gap: 16px;
+      }
+
+      .topbar {
+        background: linear-gradient(135deg, var(--blue) 0%, var(--blue-2) 100%);
+        color: #fff;
+        border-radius: 16px;
+        padding: 18px 20px 16px;
+        box-shadow: var(--shadow);
+        flex: 0 0 auto;
       }
 
       .topbar-head {
-        display: grid;
-        grid-template-columns: 1.2fr 1fr;
-        gap: 14px;
-        align-items: start;
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        gap: 16px;
+        margin-bottom: 10px;
       }
 
-      .title-block h1 {
+      .topbar h1 {
         margin: 0 0 6px;
-        font-size: 22px;
+        font-size: 24px;
+        line-height: 1.2;
       }
 
-      .title-block p {
+      .topbar p {
         margin: 0;
         opacity: 0.92;
         font-size: 13px;
       }
 
-      .kpis {
-        display: grid;
-        grid-template-columns: 220px minmax(280px, 1fr) minmax(340px, 1.15fr);
+      .topbar-actions {
+        display: flex;
         gap: 10px;
+        flex-wrap: wrap;
       }
 
-      .kpi {
-        background: rgba(255,255,255,0.12);
-        border: 1px solid rgba(255,255,255,0.18);
-        border-radius: 14px;
-        padding: 12px 14px;
-        min-height: 82px;
-      }
-
-      .kpi-list {
-        margin-top: 8px;
-        display: grid;
-        gap: 6px;
-      }
-
-      .kpi-row {
-        display: grid;
-        grid-template-columns: minmax(0, 1fr) 64px;
-        gap: 8px;
+      .status-wrap {
+        display: flex;
         align-items: center;
-        font-size: 12px;
+        gap: 12px;
       }
 
-      .kpi-name {
+      .status-bar {
+        position: relative;
+        width: 100%;
+        height: 8px;
+        border-radius: 999px;
+        background: rgba(255, 255, 255, 0.22);
         overflow: hidden;
-        text-overflow: ellipsis;
+      }
+
+      .status-fill {
+        height: 100%;
+        width: 0%;
+        border-radius: 999px;
+        background: linear-gradient(90deg, #ffffff 0%, #d7ebff 100%);
+        transition: width 0.22s ease;
+      }
+
+      .status-text {
+        min-width: 140px;
+        font-size: 12px;
+        opacity: 0.95;
+        text-align: right;
         white-space: nowrap;
       }
 
-      .kpi-days {
-        text-align: right;
+      .nav-tabs {
+        display: flex;
+        gap: 8px;
+        flex-wrap: wrap;
+        margin-top: 14px;
+      }
+
+      .nav-tab {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        min-width: 120px;
+        padding: 9px 14px;
+        border-radius: 10px;
+        border: 1px solid rgba(255, 255, 255, 0.22);
+        background: rgba(255, 255, 255, 0.1);
+        color: #fff;
+        text-decoration: none;
+        font-size: 13px;
         font-weight: 700;
       }
 
-      .kpi-note {
-        margin-top: 6px;
-        font-size: 11px;
-        opacity: 0.88;
+      .nav-tab.active {
+        background: #fff;
+        color: var(--blue);
+        border-color: #fff;
+      }
+
+      .content {
+        flex: 1 1 auto;
+        min-height: 0;
+        display: flex;
+        flex-direction: column;
+        gap: 16px;
+      }
+
+      .page {
+        display: none;
+        flex: 1 1 auto;
+        min-height: 0;
+        flex-direction: column;
+        gap: 16px;
+      }
+
+      .page.active {
+        display: flex;
+      }
+
+      .kpis {
+        display: grid;
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+        gap: 12px;
+        flex: 0 0 auto;
+      }
+
+      .kpi {
+        background: var(--card);
+        border: 1px solid var(--line);
+        border-radius: 16px;
+        padding: 14px 16px;
+        box-shadow: var(--shadow);
+        min-height: 94px;
       }
 
       .kpi .label {
-        font-size: 11px;
-        opacity: 0.9;
+        font-size: 12px;
+        color: var(--muted);
         margin-bottom: 8px;
       }
 
       .kpi .value {
-        font-size: 24px;
+        font-size: 26px;
         font-weight: 700;
-        line-height: 1.1;
       }
 
-      .kpi .sub {
+      .kpi .subvalue {
         margin-top: 6px;
-        font-size: 11px;
-        opacity: 0.9;
+        font-size: 12px;
+        color: var(--muted);
       }
 
       .filters {
@@ -169,7 +200,7 @@
         border-radius: 16px;
         padding: 14px 16px;
         box-shadow: var(--shadow);
-        margin-bottom: 14px;
+        flex: 0 0 auto;
       }
 
       .filters-grid {
@@ -185,27 +216,41 @@
         margin-bottom: 6px;
       }
 
-      .field select, .field input {
+      .field select,
+      .field input {
         width: 100%;
         border: 1px solid var(--line);
         border-radius: 10px;
         padding: 9px 10px;
         background: #fff;
         font-size: 13px;
+        color: var(--text);
       }
 
-      .table-card {
+      .table-card,
+      .placeholder-card {
         background: var(--card);
         border: 1px solid var(--line);
         border-radius: 16px;
-        box-shadow: var(--shadow);
         overflow: hidden;
+        box-shadow: var(--shadow);
+        flex: 1 1 auto;
+        min-height: 0;
+        display: flex;
+        flex-direction: column;
+      }
+
+      .placeholder-card {
+        align-items: center;
+        justify-content: center;
+        padding: 32px;
+        text-align: center;
       }
 
       .table-wrap {
+        flex: 1 1 auto;
+        min-height: 0;
         overflow: auto;
-        max-height: calc(100vh - 360px);
-        background: #fff;
       }
 
       table {
@@ -213,50 +258,54 @@
         min-width: 100%;
         border-collapse: separate;
         border-spacing: 0;
-        table-layout: fixed;
-        font-size: 12px;
       }
 
       thead th {
         position: sticky;
         top: 0;
         z-index: 5;
-        background: #f1f5f9;
-        border-bottom: 1px solid var(--line);
+        background: #e9f0f7;
         color: #243b53;
+        font-size: 12px;
+        line-height: 1.15;
         text-align: left;
-        padding: 9px 8px;
+        padding: 9px 7px;
+        border-bottom: 1px solid var(--line);
         white-space: normal;
         word-break: break-word;
-        line-height: 1.15;
-        vertical-align: bottom;
+        min-width: 72px;
+        max-width: 112px;
+        cursor: help;
       }
 
       tbody td {
-        border-bottom: 1px solid #eef2f7;
-        padding: 7px 8px;
+        padding: 8px 8px;
+        border-bottom: 1px solid #eef2f6;
+        font-size: 13px;
         vertical-align: middle;
+        white-space: nowrap;
         background: #fff;
       }
 
+      tbody tr:nth-child(even) td {
+        background: #fbfcfe;
+      }
+
       tbody tr:hover td {
-        background: #fbfdff;
+        background: #f2f7fc;
       }
 
       .num {
         text-align: right;
-        white-space: nowrap;
+        font-variant-numeric: tabular-nums;
       }
 
-      .muted { color: var(--muted); }
-
-      .cat-out td {
-        background: #fff7f7;
-        color: #8a3f3f;
+      .muted {
+        color: var(--muted);
       }
 
-      .cat-out:hover td {
-        background: #ffecec;
+      .cat-out {
+        color: #d88f8f;
       }
 
       .group-row td {
@@ -271,10 +320,10 @@
         user-select: none;
       }
 
-      .indent-1 { padding-left: 16px !important; }
-      .indent-2 { padding-left: 30px !important; }
-      .indent-3 { padding-left: 44px !important; }
-      .indent-4 { padding-left: 58px !important; }
+      .indent-1 { padding-left: 14px !important; }
+      .indent-2 { padding-left: 26px !important; }
+      .indent-3 { padding-left: 38px !important; }
+      .indent-4 { padding-left: 50px !important; }
 
       .badge {
         display: inline-block;
@@ -293,11 +342,11 @@
         align-items: end;
         gap: 2px;
         height: 28px;
-        min-width: 94px;
+        min-width: 110px;
       }
 
       .spark span {
-        width: 4px;
+        width: 5px;
         background: linear-gradient(180deg, #7aa6d8 0%, #1f4e78 100%);
         border-radius: 2px 2px 0 0;
         display: inline-block;
@@ -311,17 +360,12 @@
 
       .footer-actions {
         display: flex;
-        justify-content: space-between;
+        justify-content: flex-end;
         gap: 10px;
         padding: 14px 16px;
         border-top: 1px solid var(--line);
         background: #fcfdff;
-      }
-
-      .left-actions, .right-actions {
-        display: flex;
-        gap: 10px;
-        flex-wrap: wrap;
+        flex: 0 0 auto;
       }
 
       button {
@@ -332,148 +376,304 @@
         cursor: pointer;
       }
 
-      .btn-secondary { background: #eef3f8; color: #243b53; }
-      .btn-primary { background: #1f4e78; color: #fff; }
-      .btn-success { background: #1f7a4d; color: #fff; }
+      .btn-secondary {
+        background: #eef3f8;
+        color: #243b53;
+      }
 
-      .sticky-1, .sticky-2, .sticky-3, .sticky-4, .sticky-5 {
+      .btn-primary {
+        background: #1f4e78;
+        color: #fff;
+      }
+
+      .btn-light {
+        background: rgba(255, 255, 255, 0.14);
+        color: #fff;
+        border: 1px solid rgba(255, 255, 255, 0.22);
+      }
+
+      .sticky-1, .sticky-2, .sticky-3, .sticky-4, .sticky-5, .sticky-last {
         position: sticky;
         z-index: 4;
+      }
+
+      .sticky-1 { left: 0; min-width: 118px; max-width: 118px; }
+      .sticky-2 { left: 118px; min-width: 220px; max-width: 220px; }
+      .sticky-3 { left: 338px; min-width: 104px; max-width: 104px; }
+      .sticky-4 { left: 442px; min-width: 104px; max-width: 104px; }
+      .sticky-5 { left: 546px; min-width: 92px; max-width: 92px; }
+      .sticky-last { right: 0; min-width: 92px; max-width: 92px; box-shadow: -4px 0 8px rgba(15, 23, 42, 0.04); }
+
+      thead .sticky-1,
+      thead .sticky-2,
+      thead .sticky-3,
+      thead .sticky-4,
+      thead .sticky-5,
+      thead .sticky-last {
+        z-index: 7;
+        background: #e9f0f7;
+      }
+
+      tbody td.sticky-1,
+      tbody td.sticky-2,
+      tbody td.sticky-3,
+      tbody td.sticky-4,
+      tbody td.sticky-5,
+      tbody td.sticky-last {
         background: inherit;
       }
-      thead .sticky-1, thead .sticky-2, thead .sticky-3, thead .sticky-4, thead .sticky-5 {
-        z-index: 6;
-        background: #f1f5f9;
-      }
-      .sticky-1 { left: 0; min-width: 170px; max-width: 170px; }
-      .sticky-2 { left: 170px; min-width: 260px; max-width: 260px; }
-      .sticky-3 { left: 430px; min-width: 100px; max-width: 100px; }
-      .sticky-4 { left: 530px; min-width: 110px; max-width: 110px; }
-      .sticky-5 { left: 640px; min-width: 160px; max-width: 160px; }
 
-      .w-sm { min-width: 72px; max-width: 72px; }
-      .w-md { min-width: 86px; max-width: 86px; }
-      .w-lg { min-width: 100px; max-width: 100px; }
-      .w-trend { min-width: 108px; max-width: 108px; }
+      .w-80 { min-width: 80px; max-width: 80px; }
+      .w-90 { min-width: 86px; max-width: 86px; }
+      .w-100 { min-width: 96px; max-width: 96px; }
+      .w-110 { min-width: 104px; max-width: 104px; }
+      .w-120 { min-width: 112px; max-width: 112px; }
+      .w-140 { min-width: 140px; max-width: 140px; }
 
       @media (max-width: 1500px) {
-        .topbar-head { grid-template-columns: 1fr; }
-        .kpis { grid-template-columns: 220px minmax(280px, 1fr) minmax(340px, 1.15fr); }
-        .filters-grid { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+        .filters-grid {
+          grid-template-columns: repeat(4, minmax(0, 1fr));
+        }
+
+        .kpis {
+          grid-template-columns: repeat(2, minmax(0, 1fr));
+        }
+      }
+
+      @media (max-width: 900px) {
+        .app {
+          padding: 10px;
+        }
+
+        .filters-grid,
+        .kpis {
+          grid-template-columns: 1fr;
+        }
+
+        .topbar-head {
+          flex-direction: column;
+          align-items: stretch;
+        }
+
+        .status-wrap {
+          flex-direction: column;
+          align-items: stretch;
+        }
+
+        .status-text {
+          text-align: left;
+        }
       }
     </style>
   </head>
   <body>
     <div class="app">
       <div class="topbar">
-        <div class="statusbar">
-          <div class="status-meta">
-            <span class="status-dot"></span>
-            <span id="statusText">Загрузка данных…</span>
-          </div>
-          <div id="statusCounter" class="status-meta"></div>
-        </div>
-        <div class="progress"><div id="progressBar" class="progress-bar"></div></div>
-        <div class="topbar-head" style="margin-top: 12px;">
-          <div class="title-block">
-            <h1>Dashboard1 · HTML</h1>
+        <div class="topbar-head">
+          <div>
+            <h1>Дашборды · WebApp</h1>
             <p id="metaText">Загрузка данных…</p>
           </div>
+          <div class="topbar-actions">
+            <button class="btn-light" onclick="reloadData()">Обновить</button>
+          </div>
+        </div>
+
+        <div class="status-wrap">
+          <div class="status-bar">
+            <div id="statusFill" class="status-fill"></div>
+          </div>
+          <div id="statusText" class="status-text">Подготовка…</div>
+        </div>
+
+        <div class="nav-tabs" id="navTabs"></div>
+      </div>
+
+      <div class="content">
+        <section id="page-dashboard1" class="page active">
           <div class="kpis" id="kpis"></div>
-        </div>
-      </div>
 
-      <div class="filters">
-        <div class="filters-grid">
-          <div class="field">
-            <label>Категория</label>
-            <select id="filterCat"></select>
+          <div class="filters">
+            <div class="filters-grid">
+              <div class="field">
+                <label>Категория</label>
+                <select id="filterCat"></select>
+              </div>
+              <div class="field">
+                <label>Бренд</label>
+                <select id="filterBrand"></select>
+              </div>
+              <div class="field">
+                <label>Группа 1</label>
+                <select id="filterTg1"></select>
+              </div>
+              <div class="field">
+                <label>Группа 2</label>
+                <select id="filterTg2"></select>
+              </div>
+              <div class="field">
+                <label>Группа 3</label>
+                <select id="filterTg3"></select>
+              </div>
+              <div class="field">
+                <label>Только запас &lt; 30</label>
+                <select id="filterZapas30">
+                  <option value="">Все</option>
+                  <option value="Да">Да</option>
+                </select>
+              </div>
+              <div class="field">
+                <label>Поиск</label>
+                <input id="searchText" type="text" placeholder="Наименование, артикул, бренд…" />
+              </div>
+            </div>
           </div>
-          <div class="field">
-            <label>Бренд</label>
-            <select id="filterBrand"></select>
-          </div>
-          <div class="field">
-            <label>Группа 1</label>
-            <select id="filterTg1"></select>
-          </div>
-          <div class="field">
-            <label>Группа 2</label>
-            <select id="filterTg2"></select>
-          </div>
-          <div class="field">
-            <label>Группа 3</label>
-            <select id="filterTg3"></select>
-          </div>
-          <div class="field">
-            <label>Только запас &lt; 30</label>
-            <select id="filterZapas30">
-              <option value="">Все</option>
-              <option value="Да">Да</option>
-            </select>
-          </div>
-          <div class="field">
-            <label>Поиск</label>
-            <input id="searchText" type="text" placeholder="Наименование, артикул, бренд…" />
-          </div>
-        </div>
-      </div>
 
-      <div class="table-card">
-        <div class="table-wrap">
-          <div id="loading" class="loading">Загрузка Dashboard1…</div>
-          <table id="dataTable" style="display:none;">
-            <thead>
-              <tr>
-                <th class="sticky-1">Иерархия</th>
-                <th class="sticky-2">Наименование</th>
-                <th class="sticky-3">Артикул</th>
-                <th class="sticky-4">Артикул WB</th>
-                <th class="sticky-5">Категория</th>
-                <th class="num w-sm">Заказано поставщику</th>
-                <th class="num w-sm">В производстве</th>
-                <th class="num w-sm">Остаток сырья</th>
-                <th class="num w-sm">Готовая продукция</th>
-                <th class="num w-sm">В резерве</th>
-                <th class="num w-sm">Отгружено на РВБ</th>
-                <th class="num w-sm">ФБО остаток</th>
-                <th class="num w-sm">Заказы FBO</th>
-                <th class="num w-sm">Заказы FBS</th>
-                <th class="num w-sm">Заказы всего</th>
-                <th class="w-trend">Тренд 14д</th>
-                <th class="num w-md">Суммарный остаток</th>
-                <th class="num w-md">Средние заказы/день</th>
-                <th class="num w-lg">Запас, дней</th>
-              </tr>
-            </thead>
-            <tbody id="tableBody"></tbody>
-          </table>
-          <div id="empty" class="empty" style="display:none;">Нет строк по выбранным фильтрам.</div>
-        </div>
-        <div class="footer-actions">
-          <div class="left-actions">
-            <button class="btn-secondary" onclick="resetFilters()">Сбросить фильтры</button>
-            <button class="btn-success" onclick="saveCurrentView()">Сохранить текущий вид</button>
-            <button class="btn-success" onclick="saveFullView()">Сохранить весь отчёт</button>
+          <div class="table-card">
+            <div class="table-wrap">
+              <div id="loading" class="loading">Загрузка Dashboard1…</div>
+              <table id="dataTable" style="display:none;">
+                <thead>
+                  <tr id="tableHeadRow"></tr>
+                </thead>
+                <tbody id="tableBody"></tbody>
+              </table>
+              <div id="empty" class="empty" style="display:none;">Нет строк по выбранным фильтрам.</div>
+            </div>
+
+            <div class="footer-actions">
+              <button class="btn-secondary" onclick="resetFilters()">Сбросить фильтры</button>
+            </div>
           </div>
-          <div class="right-actions">
-            <button class="btn-primary" onclick="google.script.host.close()">Закрыть</button>
+        </section>
+
+        <section id="page-dashboard2" class="page">
+          <div class="placeholder-card">
+            <div>
+              <h2>Dashboard2</h2>
+              <p class="muted">Страница зарезервирована. Сюда можно добавить следующий дашборд без изменения Dashboard1.</p>
+            </div>
           </div>
-        </div>
+        </section>
+
+        <section id="page-dashboard3" class="page">
+          <div class="placeholder-card">
+            <div>
+              <h2>Dashboard3</h2>
+              <p class="muted">Страница зарезервирована. Навигация уже готова для следующих web app дашбордов.</p>
+            </div>
+          </div>
+        </section>
       </div>
     </div>
 
     <script>
+      const ACTIVE_PAGE = '<?= activePage ?>';
+      const PAGES = [
+        { id: 'dashboard1', title: 'Dashboard1' },
+        { id: 'dashboard2', title: 'Dashboard2' },
+        { id: 'dashboard3', title: 'Dashboard3' }
+      ];
+
+      const TABLE_COLUMNS = [
+        { key: 'hierarchy', label: 'Иерархия', className: 'sticky-1', help: 'Уровень группировки: Бренд → Группа 1 → Группа 2 → Группа 3 → SKU. Источник: поля report Бренд, Товарная группа 1/2/3.' },
+        { key: 'nom', label: 'Наименование', className: 'sticky-2', help: 'Источник: report → Наименование.' },
+        { key: 'art1C', label: 'Артикул', className: 'sticky-3', help: 'Источник: report → Артикул.' },
+        { key: 'artwb', label: 'Артикул WB', className: 'sticky-4', help: 'Источник: report → Артикул ВБ.' },
+        { key: 'cat', label: 'Категория', className: 'sticky-5', help: 'Источник: report → Категория товаров.' },
+        { key: 'order', label: 'Заказано\nпоставщику', className: 'num w-100', help: 'Источник: report → Заказано поставщику.' },
+        { key: 'inwork', label: 'В\nпроизводстве', className: 'num w-100', help: 'Источник: report → В производстве.' },
+        { key: 'rawstock', label: 'Остаток\nсырья', className: 'num w-90', help: 'Источник: report → Остаток сырья в шт.' },
+        { key: 'stock', label: 'Готовая\nпродукция', className: 'num w-90', help: 'Источник: report → Готовая продукция на складе.' },
+        { key: 'reserved', label: 'В\nрезерве', className: 'num w-90', help: 'Источник: report → В резерве.' },
+        { key: 'shipped', label: 'Отгружено\nна РВБ', className: 'num w-100', help: 'Источник: report → Отгружено на РВБ.' },
+        { key: 'fbostock', label: 'ФБО\nостаток', className: 'num w-90', help: 'Источник: report → ФБО остаток.' },
+        { key: 'ordersFBO', label: 'Заказы\nFBO', className: 'num w-80', help: 'Источник: report → ordersFBO.' },
+        { key: 'ordersFBS', label: 'Заказы\nFBS', className: 'num w-80', help: 'Источник: report → ordersFBS.' },
+        { key: 'orderssum', label: 'Заказы\nвсего', className: 'num w-80', help: 'Источник: report → orderssum = ordersFBO + ordersFBS.' },
+        { key: 'trend14d', label: 'Тренд 14д', className: 'w-120', help: 'Источник: report → trend14d. Показывает ряд заказов за последние 14 дней.' },
+        { key: 'sumstock', label: 'Суммарный\nостаток', className: 'num w-90', help: 'Источник: report → sumstock = stock + reserved + shipped + fbostock.' },
+        { key: 'dayorders', label: 'Средние\nзаказы/день', className: 'num w-90', help: 'Источник: report → dayorders = total orders за 14 дней / число дней, в которые были заказы.' },
+        { key: 'zapas', label: 'Запас,\nдней', className: 'num w-90 sticky-last', help: 'Источник: report → zapas = sumstock / dayorders. Колонка закреплена справа.' }
+      ];
+
       let rawData = null;
       let expanded = new Set();
-      let currentFilteredRows = [];
-      let progressTimer = null;
-      let searchDebounceTimer = null;
+      let searchDebounce = null;
+      let lastRenderToken = 0;
 
-      document.addEventListener('DOMContentLoaded', loadData);
+      document.addEventListener('DOMContentLoaded', function() {
+        renderNavTabs();
+        initPages();
+        bindEvents();
+        renderTableHead();
+        if (ACTIVE_PAGE === 'dashboard1') {
+          loadData();
+        } else {
+          document.getElementById('metaText').textContent = 'Открыта зарезервированная страница для следующего дашборда.';
+          finishProgress('Готово');
+        }
+      });
+
+      function renderNavTabs() {
+        const root = document.getElementById('navTabs');
+        root.innerHTML = PAGES.map(page => {
+          const activeClass = page.id === ACTIVE_PAGE ? ' active' : '';
+          return `<a class="nav-tab${activeClass}" href="?page=${encodeURIComponent(page.id)}">${escapeHtml(page.title)}</a>`;
+        }).join('');
+      }
+
+      function initPages() {
+        PAGES.forEach(page => {
+          const pageEl = document.getElementById(`page-${page.id}`);
+          if (!pageEl) return;
+          pageEl.classList.toggle('active', page.id === ACTIVE_PAGE);
+        });
+      }
+
+      function renderTableHead() {
+        const row = document.getElementById('tableHeadRow');
+        row.innerHTML = TABLE_COLUMNS.map(col => {
+          const className = col.className ? ` class="${col.className}"` : '';
+          return `<th${className} title="${escapeHtml(col.help)}">${col.label.replaceAll('\n', '<br>')}</th>`;
+        }).join('');
+      }
+
+      function bindEvents() {
+        ['filterCat', 'filterBrand', 'filterTg1', 'filterTg2', 'filterTg3', 'filterZapas30']
+          .forEach(id => {
+            const el = document.getElementById(id);
+            if (!el) return;
+            el.addEventListener('change', function() {
+              beginProgress('Применение фильтров…', 20);
+              render();
+            });
+          });
+
+        const search = document.getElementById('searchText');
+        if (search) {
+          search.addEventListener('input', function() {
+            clearTimeout(searchDebounce);
+            beginProgress('Поиск…', 15);
+            searchDebounce = setTimeout(render, 180);
+          });
+        }
+
+        document.getElementById('tableBody').addEventListener('click', function(event) {
+          const toggle = event.target.closest('[data-group-id]');
+          if (!toggle) return;
+          toggleGroup(toggle.dataset.groupId);
+        });
+      }
+
+      function reloadData() {
+        if (ACTIVE_PAGE !== 'dashboard1') return;
+        loadData();
+      }
 
       function loadData() {
-        startBusy('Загрузка данных из report…');
+        beginProgress('Загрузка данных…', 10);
+
         google.script.run
           .withSuccessHandler(initDashboard)
           .withFailureHandler(showError)
@@ -482,87 +682,55 @@
 
       function initDashboard(data) {
         rawData = data;
+
         document.getElementById('metaText').textContent =
           `Обновлено: ${data.generatedAt} · Период тренда: последние ${data.lookbackDays} дней`;
 
-        renderKpis(data.kpis);
         fillSelect('filterCat', data.filters.cat, 'Все категории');
         fillSelect('filterBrand', data.filters.brandinfo, 'Все бренды');
         fillSelect('filterTg1', data.filters.tg1, 'Все группы 1');
         fillSelect('filterTg2', data.filters.tg2, 'Все группы 2');
         fillSelect('filterTg3', data.filters.tg3, 'Все группы 3');
 
-        ['filterCat', 'filterBrand', 'filterTg1', 'filterTg2', 'filterTg3', 'filterZapas30']
-          .forEach(id => document.getElementById(id).addEventListener('input', handleFilterChange));
+        expanded = new Set(['root']);
 
-        document.getElementById('searchText').addEventListener('input', handleSearchInput);
-
-        expanded.add('root');
+        setProgress('Данные загружены', 55);
         render();
-        finishBusy(`Готово · строк в источнике: ${fmtInt(data.rows.length)}`, `${fmtInt(data.rows.length)} SKU`);
-      }
-
-      function handleSearchInput() {
-        if (searchDebounceTimer) {
-          window.clearTimeout(searchDebounceTimer);
-        }
-
-        startBusy('Поиск и обновление фильтров…');
-        searchDebounceTimer = window.setTimeout(() => {
-          render();
-          finishBusy(`Фильтры применены · строк: ${fmtInt(currentFilteredRows.length)}`, `${fmtInt(currentFilteredRows.length)} SKU`);
-          searchDebounceTimer = null;
-        }, 220);
-      }
-
-      function handleFilterChange() {
-        startBusy('Применение фильтров…');
-        window.setTimeout(() => {
-          render();
-          finishBusy(`Фильтры применены · строк: ${fmtInt(currentFilteredRows.length)}`, `${fmtInt(currentFilteredRows.length)} SKU`);
-        }, 10);
       }
 
       function showError(error) {
-        stopProgress(100);
-        document.getElementById('statusText').textContent = error.message || String(error);
-        document.getElementById('loading').textContent = error.message || String(error);
+        const msg = error && error.message ? error.message : String(error);
+        document.getElementById('loading').textContent = msg;
+        document.getElementById('loading').style.display = 'block';
+        document.getElementById('dataTable').style.display = 'none';
+        document.getElementById('empty').style.display = 'none';
+        failProgress('Ошибка загрузки');
       }
 
-      function renderKpis(kpis) {
-        const brandRows = kpis.brandTurnoverRows || [];
-        const categoryRows = kpis.categoryTurnoverRows || [];
-
-        document.getElementById('kpis').innerHTML = `
+      function renderKpis(summary) {
+        const root = document.getElementById('kpis');
+        root.innerHTML = `
           <div class="kpi">
-            <div class="label">Запас &lt; 30 дней</div>
-            <div class="value">${fmtInt(kpis.lt30)}</div>
-            <div class="sub">SKU в текущей выборке</div>
+            <div class="label">Turnover, дней</div>
+            <div class="value">${fmtFloat(summary.turnover)}</div>
+            <div class="subvalue">sumstock / dayorders по отфильтрованным строкам</div>
           </div>
           <div class="kpi">
-            <div class="label">Оборачиваемость по брендам</div>
-            <div class="kpi-list">${renderTurnoverList(brandRows)}</div>
-            <div class="kpi-note">Показаны бренды с самой быстрой оборачиваемостью</div>
+            <div class="label">Суммарный остаток</div>
+            <div class="value">${fmtInt(summary.sumstock)}</div>
+            <div class="subvalue">Источник: report → sumstock</div>
           </div>
           <div class="kpi">
-            <div class="label">Категории внутри брендов</div>
-            <div class="kpi-list">${renderTurnoverList(categoryRows)}</div>
-            <div class="kpi-note">Формат: Бренд → Категория</div>
+            <div class="label">Уходимость, шт/день</div>
+            <div class="value">${fmtFloat(summary.totalDayorders)}</div>
+            <div class="subvalue">Сумма dayorders по фильтрам</div>
+          </div>
+          <div class="kpi">
+            <div class="label">SKU в выборке</div>
+            <div class="value">${fmtInt(summary.totalSku)}</div>
+            <div class="subvalue">С turnover: ${fmtInt(summary.turnoverSku)} · запас &lt; 30: ${fmtInt(summary.lowStockSku)}</div>
           </div>
         `;
-      }
-
-      function renderTurnoverList(items) {
-        if (!items || !items.length) {
-          return '<div class="sub">Нет данных для расчёта</div>';
-        }
-
-        return items.map(item => `
-          <div class="kpi-row">
-            <div class="kpi-name" title="${escapeHtml(item.name)}">${escapeHtml(item.name)}</div>
-            <div class="kpi-days">${fmtFloat(item.days)}</div>
-          </div>
-        `).join('');
       }
 
       function fillSelect(id, values, placeholder) {
@@ -573,23 +741,48 @@
 
       function resetFilters() {
         ['filterCat', 'filterBrand', 'filterTg1', 'filterTg2', 'filterTg3', 'filterZapas30', 'searchText']
-          .forEach(id => document.getElementById(id).value = '');
-        handleFilterChange();
+          .forEach(id => {
+            const el = document.getElementById(id);
+            if (el) el.value = '';
+          });
+
+        beginProgress('Сброс фильтров…', 15);
+        render();
       }
 
       function render() {
+        if (ACTIVE_PAGE !== 'dashboard1') {
+          finishProgress('Готово');
+          return;
+        }
+
+        if (!rawData || !rawData.rows) {
+          failProgress('Нет данных');
+          return;
+        }
+
+        const renderToken = ++lastRenderToken;
+        setProgress('Подготовка строк…', 65);
+
         const rows = applyFilters(rawData.rows);
-        currentFilteredRows = rows;
-        renderKpis(buildKpisForRows(rows));
+        const summary = summarizeRows(rows);
         const tree = buildTree(rows);
 
+        renderKpis(summary);
+        setProgress('Построение таблицы…', 82);
+
         const tbody = document.getElementById('tableBody');
-        tbody.innerHTML = '';
-        appendTreeRows(tbody, tree, 0, 'root');
+        tbody.innerHTML = buildTreeHtml(tree, 0, 'root');
+
+        if (renderToken !== lastRenderToken) {
+          return;
+        }
 
         document.getElementById('loading').style.display = 'none';
         document.getElementById('dataTable').style.display = rows.length ? 'table' : 'none';
         document.getElementById('empty').style.display = rows.length ? 'none' : 'block';
+
+        finishProgress(rows.length ? `Готово · строк: ${fmtInt(rows.length)}` : 'Готово · нет строк');
       }
 
       function applyFilters(rows) {
@@ -608,149 +801,128 @@
           if (tg2 && r.tg2 !== tg2) return false;
           if (tg3 && r.tg3 !== tg3) return false;
           if (zapas30 && r.zapasFlag !== zapas30) return false;
-
-          if (search) {
-            const hay = [
-              r.nom, r.art1C, r.artwb, r.brandinfo, r.tg1, r.tg2, r.tg3, r.cat
-            ].join(' ').toLowerCase();
-
-            if (!hay.includes(search)) return false;
-          }
-
+          if (search && !String(r.searchText || '').includes(search)) return false;
           return true;
         });
       }
 
-      function buildKpisForRows(rows) {
-        const lt30 = rows.filter(r => r.zapas !== null && r.zapas < 30).length;
-        return {
-          lt30,
-          brandTurnoverRows: buildTurnoverRanking(rows, ['brandinfo'], 5),
-          categoryTurnoverRows: buildTurnoverRanking(rows, ['brandinfo', 'cat'], 7)
-        };
-      }
+      function summarizeRows(rows) {
+        const summary = rows.reduce((acc, row) => {
+          acc.totalSku += 1;
+          acc.sumstock += Number(row.sumstock || 0);
 
-      function buildTurnoverRanking(rows, keys, limit) {
-        const groups = new Map();
+          if (row.dayorders !== null && Number(row.dayorders) > 0) {
+            acc.totalDayorders += Number(row.dayorders);
+            acc.turnoverSku += 1;
+          }
 
-        rows.forEach(row => {
-          const keyValues = keys.map(key => String(row[key] || '').trim());
-          if (keyValues.some(value => !value)) return;
+          if (row.zapas !== null && Number(row.zapas) < 30) {
+            acc.lowStockSku += 1;
+          }
 
-          const groupKey = keyValues.join('¦');
-          const current = groups.get(groupKey) || {
-            brandinfo: keyValues[0] || '',
-            cat: keyValues[1] || '',
-            skuCount: 0,
-            sumstock: 0,
-            dayorders: 0
-          };
-
-          current.skuCount += 1;
-          current.sumstock += Number(row.sumstock || 0);
-          current.dayorders += Number(row.dayorders || 0);
-          groups.set(groupKey, current);
+          return acc;
+        }, {
+          totalSku: 0,
+          turnoverSku: 0,
+          sumstock: 0,
+          totalDayorders: 0,
+          turnover: null,
+          lowStockSku: 0
         });
 
-        return [...groups.values()]
-          .filter(item => item.dayorders > 0)
-          .map(item => ({
-            name: item.cat ? `${item.brandinfo} → ${item.cat}` : item.brandinfo,
-            brandinfo: item.brandinfo,
-            cat: item.cat,
-            skuCount: item.skuCount,
-            days: item.sumstock / item.dayorders
-          }))
-          .sort((a, b) => a.days - b.days || String(a.name).localeCompare(String(b.name), 'ru'))
-          .slice(0, limit);
+        summary.turnover = summary.totalDayorders > 0
+          ? summary.sumstock / summary.totalDayorders
+          : null;
+
+        return summary;
       }
 
       function buildTree(rows) {
         const root = {};
 
         rows.forEach(row => {
-          root[row.brandinfo] ||= {};
-          root[row.brandinfo][row.tg1] ||= {};
-          root[row.brandinfo][row.tg1][row.tg2] ||= {};
-          root[row.brandinfo][row.tg1][row.tg2][row.tg3] ||= [];
-          root[row.brandinfo][row.tg1][row.tg2][row.tg3].push(row);
+          const brand = row.brandinfo || 'Без бренда';
+          const tg1 = row.tg1 || 'Без группы 1';
+          const tg2 = row.tg2 || 'Без группы 2';
+          const tg3 = row.tg3 || 'Без группы 3';
+
+          root[brand] ||= {};
+          root[brand][tg1] ||= {};
+          root[brand][tg1][tg2] ||= {};
+          root[brand][tg1][tg2][tg3] ||= [];
+          root[brand][tg1][tg2][tg3].push(row);
         });
 
         return root;
       }
 
-      function appendTreeRows(tbody, tree, depth, path) {
-        Object.keys(tree).forEach(key => {
+      function buildTreeHtml(tree, depth, path) {
+        return Object.keys(tree).map(key => {
           const node = tree[key];
           const groupId = `${path}__${key}`;
           const isLeafArray = Array.isArray(node);
           const isOpen = expanded.has(groupId);
 
           if (isLeafArray) {
-            if (!expanded.has(path)) return;
-            node.forEach(row => tbody.appendChild(renderDataRow(row)));
-            return;
+            if (!expanded.has(path)) return '';
+            return node.map(renderDataRowHtml).join('');
           }
 
-          tbody.appendChild(renderGroupRow(key, depth, groupId, isOpen));
-
-          if (isOpen) {
-            appendTreeRows(tbody, node, depth + 1, groupId);
-          }
-        });
+          const groupHtml = renderGroupRowHtml(key, depth, groupId, isOpen);
+          const childrenHtml = isOpen ? buildTreeHtml(node, depth + 1, groupId) : '';
+          return groupHtml + childrenHtml;
+        }).join('');
       }
 
-      function renderGroupRow(label, depth, groupId, isOpen) {
-        const tr = document.createElement('tr');
-        tr.className = 'group-row';
-
-        const td = document.createElement('td');
-        td.colSpan = 19;
-        td.className = `group-toggle sticky-1 indent-${Math.min(depth + 1, 4)}`;
-        td.innerHTML = `${isOpen ? '▾' : '▸'} ${escapeHtml(label)}`;
-        td.onclick = () => toggleGroup(groupId);
-
-        tr.appendChild(td);
-        return tr;
+      function renderGroupRowHtml(label, depth, groupId, isOpen) {
+        return `
+          <tr class="group-row">
+            <td colspan="19" class="group-toggle indent-${Math.min(depth + 1, 4)}" data-group-id="${escapeHtml(groupId)}">
+              ${isOpen ? '▾' : '▸'} ${escapeHtml(label)}
+            </td>
+          </tr>
+        `;
       }
 
       function toggleGroup(groupId) {
         if (expanded.has(groupId)) expanded.delete(groupId);
         else expanded.add(groupId);
+
+        beginProgress('Обновление структуры…', 40);
         render();
       }
 
-      function renderDataRow(r) {
-        const tr = document.createElement('tr');
-        if (r.cat === 'Выведен') tr.classList.add('cat-out');
-
-        tr.innerHTML = `
-          <td class="muted sticky-1">SKU</td>
-          <td class="sticky-2">${escapeHtml(r.nom || '')}</td>
-          <td class="sticky-3">${escapeHtml(r.art1C || '')}</td>
-          <td class="sticky-4">${escapeHtml(r.artwb || '')}</td>
-          <td class="sticky-5">${escapeHtml(r.cat || '')}</td>
-          <td class="num w-sm">${fmtInt(r.order)}</td>
-          <td class="num w-sm">${fmtInt(r.inwork)}</td>
-          <td class="num w-sm">${fmtInt(r.rawstock)}</td>
-          <td class="num w-sm">${fmtInt(r.stock)}</td>
-          <td class="num w-sm">${fmtInt(r.reserved)}</td>
-          <td class="num w-sm">${fmtInt(r.shipped)}</td>
-          <td class="num w-sm">${fmtInt(r.fbostock)}</td>
-          <td class="num w-sm">${fmtInt(r.ordersFBO)}</td>
-          <td class="num w-sm">${fmtInt(r.ordersFBS)}</td>
-          <td class="num w-sm">${fmtInt(r.orderssum)}</td>
-          <td class="w-trend">${renderSpark(r.trend14d || [])}</td>
-          <td class="num w-md">${fmtInt(r.sumstock)}</td>
-          <td class="num w-md">${fmtFloat(r.dayorders)}</td>
-          <td class="num w-lg">${renderZapas(r.zapas)}</td>
+      function renderDataRowHtml(r) {
+        const rowClass = r.cat === 'Выведен' ? ' class="cat-out"' : '';
+        return `
+          <tr${rowClass}>
+            <td class="sticky-1 muted">SKU</td>
+            <td class="sticky-2">${escapeHtml(r.nom || '')}</td>
+            <td class="sticky-3">${escapeHtml(r.art1C || '')}</td>
+            <td class="sticky-4">${escapeHtml(r.artwb || '')}</td>
+            <td class="sticky-5">${escapeHtml(r.cat || '')}</td>
+            <td class="num w-100">${fmtInt(r.order)}</td>
+            <td class="num w-100">${fmtInt(r.inwork)}</td>
+            <td class="num w-90">${fmtInt(r.rawstock)}</td>
+            <td class="num w-90">${fmtInt(r.stock)}</td>
+            <td class="num w-90">${fmtInt(r.reserved)}</td>
+            <td class="num w-100">${fmtInt(r.shipped)}</td>
+            <td class="num w-90">${fmtInt(r.fbostock)}</td>
+            <td class="num w-80">${fmtInt(r.ordersFBO)}</td>
+            <td class="num w-80">${fmtInt(r.ordersFBS)}</td>
+            <td class="num w-80">${fmtInt(r.orderssum)}</td>
+            <td class="w-120">${renderSpark(r.trend14d)}</td>
+            <td class="num w-90">${fmtInt(r.sumstock)}</td>
+            <td class="num w-90">${fmtFloat(r.dayorders)}</td>
+            <td class="num w-90 sticky-last">${renderZapas(r.zapas)}</td>
+          </tr>
         `;
-        return tr;
       }
 
       function renderSpark(series) {
-        const max = Math.max(...series, 1);
-        const bars = series.map(v => {
+        const arr = Array.isArray(series) ? series : [];
+        const max = Math.max(...arr, 1);
+        const bars = arr.map(v => {
           const h = Math.max(3, Math.round((v / max) * 26));
           return `<span style="height:${h}px"></span>`;
         }).join('');
@@ -766,62 +938,27 @@
         return `<span class="badge ok">${text}</span>`;
       }
 
-      function saveCurrentView() {
-        startBusy('Сохранение текущего вида на новый лист…');
-        google.script.run
-          .withSuccessHandler(handleSaveSuccess)
-          .withFailureHandler(showError)
-          .saveDashboard1CurrentView(buildExportPayload());
+      function beginProgress(text, percent) {
+        document.getElementById('statusText').textContent = text || 'Загрузка…';
+        document.getElementById('statusFill').style.width = `${percent || 0}%`;
       }
 
-      function saveFullView() {
-        startBusy('Сохранение полного отчёта на новый лист…');
-        google.script.run
-          .withSuccessHandler(handleSaveSuccess)
-          .withFailureHandler(showError)
-          .saveDashboard1FullView(buildExportPayload());
+      function setProgress(text, percent) {
+        document.getElementById('statusText').textContent = text || 'Загрузка…';
+        document.getElementById('statusFill').style.width = `${percent || 0}%`;
       }
 
-      function handleSaveSuccess(result) {
-        finishBusy(result.message, result.sheetName || 'Готово');
+      function finishProgress(text) {
+        document.getElementById('statusText').textContent = text || 'Готово';
+        document.getElementById('statusFill').style.width = '100%';
+        setTimeout(() => {
+          document.getElementById('statusFill').style.width = '0%';
+        }, 500);
       }
 
-      function buildExportPayload() {
-        return {
-          filters: {
-            cat: document.getElementById('filterCat').value,
-            brandinfo: document.getElementById('filterBrand').value,
-            tg1: document.getElementById('filterTg1').value,
-            tg2: document.getElementById('filterTg2').value,
-            tg3: document.getElementById('filterTg3').value,
-            zapas30: document.getElementById('filterZapas30').value,
-            search: document.getElementById('searchText').value.trim()
-          }
-        };
-      }
-
-      function startBusy(text) {
-        document.getElementById('statusText').textContent = text;
-        stopProgress(8);
-        let width = 8;
-        progressTimer = window.setInterval(() => {
-          width = Math.min(width + (width < 70 ? 11 : 4), 92);
-          document.getElementById('progressBar').style.width = `${width}%`;
-        }, 120);
-      }
-
-      function finishBusy(text, counterText = '') {
-        stopProgress(100);
-        document.getElementById('statusText').textContent = text;
-        document.getElementById('statusCounter').textContent = counterText;
-      }
-
-      function stopProgress(width = 0) {
-        if (progressTimer) {
-          window.clearInterval(progressTimer);
-          progressTimer = null;
-        }
-        document.getElementById('progressBar').style.width = `${width}%`;
+      function failProgress(text) {
+        document.getElementById('statusText').textContent = text || 'Ошибка';
+        document.getElementById('statusFill').style.width = '100%';
       }
 
       function fmtInt(v) {

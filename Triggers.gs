@@ -1,5 +1,6 @@
 function refreshAllDataForTrigger() {
-  const importResult = importLatestXlsxToInfoForTrigger();
+  // ИЗМЕНЕНИЕ: Триггер теперь берет файл из Gmail
+  const importResult = importLatestXlsxFromGmailForTrigger();
 
   if (!importResult.ok) {
     return {
@@ -82,7 +83,6 @@ function logProjectTriggers() {
       ].join(' | ')
     );
   });
-
   return {
     ok: true,
     count: triggers.length,
@@ -96,7 +96,6 @@ function deleteAllProjectTriggers() {
   triggers.forEach(function(trigger) {
     ScriptApp.deleteTrigger(trigger);
   });
-
   return {
     ok: true,
     count: triggers.length,
