@@ -1,3 +1,0 @@
-date,lastchangedate,supplierarticle,techsize,totalprice,discountpercent,warehousename,incomeid,odid,nmid,subject,category,brand,iscancel,cancel_dt,gnumber,srid,dateupdate,lk,ordertype,spp,finishedprice,pricewithdisc,country,region,warehousetype
-2026-03-10 10:00:00,2026-03-10 10:05:00,ABC,,1000,0,Main,1,1,12345,Test,Cat,Brand,0,,g1,s1,2026-03-10 10:05:00,,client,0,1000,1000,RU,Moscow,склад wb
-2026-03-11 12:00:00,2026-03-11 12:03:00,ABC,,1000,0,Main,2,2,12345,Test,Cat,Brand,0,,g2,s2,2026-03-11 12:03:00,,client,0,1000,1000,RU,Moscow,склад продавца
