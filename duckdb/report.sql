@@ -16,14 +16,14 @@ WITH info_filtered AS (
     "Вес",
     "Это набор",
     "Товарная группа 1",
-    CAST(COALESCE("Заказано поставщику", 0) AS DOUBLE) AS "Заказано поставщику",
-    CAST(COALESCE("В производстве", 0) AS DOUBLE) AS "В производстве",
-    CAST(COALESCE("Остаток сырья в шт", 0) AS DOUBLE) AS "Остаток сырья в шт",
-    CAST(COALESCE("Готовая продукция на складе", 0) AS DOUBLE) AS "Готовая продукция на складе",
-    CAST(COALESCE("В резерве", 0) AS DOUBLE) AS "В резерве",
-    CAST(COALESCE("Отгружено на РВБ", 0) AS DOUBLE) AS "Отгружено на РВБ",
-    CAST(COALESCE("ФБО остаток", 0) AS DOUBLE) AS "ФБО остаток",
-    CAST(COALESCE("Расход по новому складу", 0) AS DOUBLE) AS "Расход по новому складу"
+    COALESCE(TRY_CAST("Заказано поставщику" AS DOUBLE), 0) AS "Заказано поставщику",
+    COALESCE(TRY_CAST("В производстве" AS DOUBLE), 0) AS "В производстве",
+    COALESCE(TRY_CAST("Остаток сырья в шт" AS DOUBLE), 0) AS "Остаток сырья в шт",
+    COALESCE(TRY_CAST("Готовая продукция на складе" AS DOUBLE), 0) AS "Готовая продукция на складе",
+    COALESCE(TRY_CAST("В резерве" AS DOUBLE), 0) AS "В резерве",
+    COALESCE(TRY_CAST("Отгружено на РВБ" AS DOUBLE), 0) AS "Отгружено на РВБ",
+    COALESCE(TRY_CAST("ФБО остаток" AS DOUBLE), 0) AS "ФБО остаток",
+    COALESCE(TRY_CAST("Расход по новому складу" AS DOUBLE), 0) AS "Расход по новому складу"
   FROM info_src
   WHERE trim(CAST("Артикул ВБ" AS VARCHAR)) <> ''
     AND trim(CAST("Артикул ВБ" AS VARCHAR)) <> '0'
@@ -33,9 +33,9 @@ orders_filtered AS (
   SELECT
     trim(CAST(nmid AS VARCHAR)) AS nmid,
     lower(trim(CAST(warehousetype AS VARCHAR))) AS warehousetype,
-    CAST(date AS DATE) AS order_date
+    TRY_CAST(date AS DATE) AS order_date
   FROM orders_src
-  WHERE CAST(COALESCE(iscancel, 1) AS INTEGER) = 0
+  WHERE COALESCE(TRY_CAST(iscancel AS INTEGER), 1) = 0
     AND trim(CAST(nmid AS VARCHAR)) <> ''
     AND trim(CAST(nmid AS VARCHAR)) <> '0'
 ),
