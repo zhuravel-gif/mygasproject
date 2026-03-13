@@ -28,13 +28,22 @@ def main():
     if not rows:
         raise RuntimeError("report.csv пустой")
 
+    header = rows[0]
+    print("UPLOAD HEADER TO SHEETS:", header)
+    print("UPLOAD COLUMN COUNT:", len(header))
+
     spreadsheet = get_spreadsheet()
+    print("TARGET SPREADSHEET ID:", spreadsheet.id)
+    print("TARGET SPREADSHEET TITLE:", spreadsheet.title)
+
     worksheet = ensure_worksheet(
         spreadsheet,
         REPORT_SHEET_NAME,
         rows=max(len(rows), 1000),
         cols=max(len(rows[0]), 50),
     )
+
+    print("TARGET WORKSHEET TITLE:", worksheet.title)
 
     worksheet.clear()
 
@@ -47,3 +56,7 @@ def main():
 
     print(f"Uploaded report to worksheet '{REPORT_SHEET_NAME}'")
     print(f"Rows uploaded: {len(rows)}")
+
+
+if __name__ == "__main__":
+    main()

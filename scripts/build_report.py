@@ -1,4 +1,5 @@
 from pathlib import Path
+import csv
 
 import duckdb
 
@@ -21,10 +22,7 @@ def main():
         raise FileNotFoundError(f"Не найден файл Info: {info_csv}")
 
     if not orders_csv.exists():
-        raise FileNotFoundError(
-            f"Не найден файл orders: {orders_csv}. "
-            f"На первом этапе добавь тестовый CSV в data/raw/orders.csv"
-        )
+        raise FileNotFoundError(f"Не найден файл orders: {orders_csv}")
 
     sql = sql_path.read_text(encoding="utf-8")
     sql = sql.replace("__REPORT_CSV_PATH__", str(report_csv).replace("\\", "/"))
@@ -63,6 +61,12 @@ def main():
     con.execute(sql)
 
     print(f"Built report: {report_csv}")
+
+    with report_csv.open("r", newline="", encoding="utf-8-sig") as f:
+        reader = csv.reader(f)
+        header = next(reader, [])
+        print("REPORT HEADER FROM CSV:", header)
+        print("REPORT COLUMN COUNT:", len(header))
 
 
 if __name__ == "__main__":
