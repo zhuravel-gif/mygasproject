@@ -11,7 +11,9 @@ function doGet(e) {
   }
 
   const template = HtmlService.createTemplateFromFile('Dashboard1Window');
-  template.activePage = page === 'dashboard1' ? 'dashboard1' : 'dashboard1';
+  template.activePage = 'dashboard1';
+  template.dashboard1Url = dashboard1BuildPageUrl_('dashboard1');
+  template.dashboard2Url = dashboard1BuildPageUrl_('dashboard2');
 
   return template
     .evaluate()
@@ -25,6 +27,12 @@ function showDashboard1Html() {
 
 function dashboard1GetWebAppUrl_() {
   return PropertiesService.getScriptProperties().getProperty('DASHBOARD1_WEBAPP_URL') || '';
+}
+
+function dashboard1BuildPageUrl_(page) {
+  const baseUrl = dashboard1GetWebAppUrl_();
+  if (!baseUrl) return '';
+  return baseUrl + (baseUrl.indexOf('?') >= 0 ? '&' : '?') + 'page=' + encodeURIComponent(page);
 }
 
 function dashboardHtmlResolvePage_(e) {

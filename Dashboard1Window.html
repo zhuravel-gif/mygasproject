@@ -765,14 +765,20 @@
         }
       });
 
-      function renderNavTabs() {
-        const root = document.getElementById('navTabs');
-        root.innerHTML = PAGES.map(page => {
-          const activeClass = page.id === ACTIVE_PAGE ? ' active' : '';
-          return `<a class="nav-tab${activeClass}" href="?page=${encodeURIComponent(page.id)}">${escapeHtml(page.title)}</a>`;
-        }).join('');
-      }
+  const DASHBOARD_URLS = {
+  dashboard1: '<?= dashboard1Url ?>',
+  dashboard2: '<?= dashboard2Url ?>',
+  dashboard3: ''
+};
 
+	function renderNavTabs() {
+  	const root = document.getElementById('navTabs');
+  	root.innerHTML = PAGES.map(page => {
+   	 const activeClass = page.id === ACTIVE_PAGE ? ' active' : '';
+   	 const href = DASHBOARD_URLS[page.id] || '#';
+    	return `<a class="nav-tab${activeClass}" href="${escapeHtml(href)}">${escapeHtml(page.title)}</a>`;
+  	}).join('');
+}
       function initPages() {
         PAGES.forEach(page => {
           const pageEl = document.getElementById(`page-${page.id}`);
