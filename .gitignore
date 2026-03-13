@@ -1,0 +1,9 @@
+.clasp.json
+data/raw/*
+!data/raw/.gitkeep
+!data/raw/orders.csv
+data/out/*
+!data/out/.gitkeep
+.venv/
+__pycache__/
+*.pyc

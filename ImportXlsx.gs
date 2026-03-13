@@ -1,7 +1,13 @@
 const IMPORT_CONFIG = {
+  // Папка на Диске (используется для ручного импорта и как временная для Gmail)
   SOURCE_FOLDER_ID: '1xdR6UTj8kpiuu3YqdDbty2tZTl8jM9e7',
   TARGET_SHEET_NAME: 'Info',
-  DELETE_TEMP_CONVERTED_FILE: true
+  DELETE_TEMP_CONVERTED_FILE: true,
+  
+  // --- НАСТРОЙКИ ДЛЯ GMAIL (ДЛЯ ТРИГГЕРА) ---
+  GMAIL_SEARCH_QUERY: 'from:zhuravel@rocknail.ru to:zhuravel@rocknail.ru subject:"Остатки товаров компании" has:attachment filename:xlsx',
+  DELETE_EMAIL_AFTER_IMPORT: true, // Удалять письмо в корзину после успешного импорта
+  DELETE_SAVED_ATTACHMENT: true // Удалять временный файл вложения с Диска
 };
 
 /**
@@ -11,12 +17,11 @@ function showImportXlsxDialog() {
   const html = HtmlService.createHtmlOutputFromFile('ImportXlsxDialog')
     .setWidth(560)
     .setHeight(500);
-
   SpreadsheetApp.getUi().showModalDialog(html, 'Импорт XLSX в Info');
 }
 
 /**
- * Возвращает список XLSX-файлов из папки для выбора в диалоге.
+ * Возвращает список XLSX-файлов из папки для выбора в диалоге (Ручной импорт).
  */
 function getImportableFiles() {
   validateImportConfig_();
@@ -24,11 +29,9 @@ function getImportableFiles() {
   const folder = DriveApp.getFolderById(IMPORT_CONFIG.SOURCE_FOLDER_ID);
   const files = folder.getFiles();
   const result = [];
-
   while (files.hasNext()) {
     const file = files.next();
     const name = file.getName();
-
     if (!name.toLowerCase().endsWith('.xlsx')) {
       continue;
     }
@@ -48,7 +51,6 @@ function getImportableFiles() {
   result.sort(function(a, b) {
     return b.updated - a.updated;
   });
-
   return {
     targetSheetName: IMPORT_CONFIG.TARGET_SHEET_NAME,
     files: result
@@ -56,15 +58,78 @@ function getImportableFiles() {
 }
 
 /**
- * Импорт выбранного XLSX из HTML-диалога.
+ * Импорт выбранного XLSX из HTML-диалога (Ручной импорт).
  */
 function importSelectedXlsxToInfo(fileId) {
   return importXlsxFileToInfoCore_(fileId);
 }
 
 /**
- * Отдельная функция для триггера:
- * берёт самый свежий XLSX из папки и импортирует его в Info без UI.
+ * АВТОМАТИЧЕСКИЙ ИМПОРТ ИЗ ПОЧТЫ (ДЛЯ ТРИГГЕРА):
+ * Ищет последнее письмо в Gmail, берет XLSX-вложение, временно сохраняет на Диск, 
+ * импортирует и удаляет письмо в Корзину.
+ */
+function importLatestXlsxFromGmailForTrigger() {
+  validateImportConfig_();
+
+  // Ищем письма по настроенному запросу
+  const threads = GmailApp.search(IMPORT_CONFIG.GMAIL_SEARCH_QUERY, 0, 1);
+  
+  if (threads.length === 0) {
+    Logger.log('Не найдено писем по запросу: ' + IMPORT_CONFIG.GMAIL_SEARCH_QUERY);
+    return { ok: false, message: 'Писем с XLSX от zhuravel@rocknail.ru не найдено.' };
+  }
+
+  const thread = threads[0];
+  const messages = thread.getMessages();
+  const latestMessage = messages[messages.length - 1];
+  
+  const attachments = latestMessage.getAttachments();
+  let xlsxAttachment = null;
+  
+  for (let i = 0; i < attachments.length; i++) {
+    if (attachments[i].getName().toLowerCase().endsWith('.xlsx')) {
+      xlsxAttachment = attachments[i];
+      break;
+    }
+  }
+
+  if (!xlsxAttachment) {
+    return { ok: false, message: 'В найденном письме нет XLSX вложения.' };
+  }
+
+  // Временно сохраняем вложение на Диск
+  const folder = DriveApp.getFolderById(IMPORT_CONFIG.SOURCE_FOLDER_ID);
+  const tempFile = folder.createFile(xlsxAttachment);
+  const tempFileId = tempFile.getId();
+  
+  let result;
+  
+  try {
+    // Импортируем данные
+    result = importXlsxFileToInfoCore_(tempFileId);
+    
+    // Если импорт успешен, перемещаем цепочку писем в Корзину
+    if (result.ok && IMPORT_CONFIG.DELETE_EMAIL_AFTER_IMPORT) {
+      thread.moveToTrash();
+    }
+  } finally {
+    // Всегда удаляем сохраненное вложение (чтобы не засорять Диск)
+    if (IMPORT_CONFIG.DELETE_SAVED_ATTACHMENT) {
+      try {
+        tempFile.setTrashed(true);
+      } catch (e) {
+        Logger.log('Не удалось удалить временный файл вложения: ' + e);
+      }
+    }
+  }
+
+  return result;
+}
+
+/**
+ * РУЧНОЙ ИМПОРТ ИЗ ПАПКИ (БЕЗ ОКНА):
+ * Вызывается из меню Code.gs -> runImportXlsxFromMenu
  */
 function importLatestXlsxToInfoForTrigger() {
   validateImportConfig_();
@@ -83,17 +148,9 @@ function importLatestXlsxToInfoForTrigger() {
 
 /**
  * Общая логика импорта XLSX в Info.
- *
- * Логика:
- * 1. Конвертируем XLSX во временный Google Sheets
- * 2. Берём 1 строку как заголовки источника
- * 3. Импортируем данные со 2 строки
- * 4. Строим лист Info строго по INFO_SCHEMA
- * 5. Если какого-то sourceHeader нет в XLSX — в колонке будут пустые значения
  */
 function importXlsxFileToInfoCore_(fileId) {
   validateImportConfig_();
-
   if (!fileId) {
     return {
       ok: false,
@@ -106,7 +163,6 @@ function importXlsxFileToInfoCore_(fileId) {
 
   let sourceFile;
   let tempSpreadsheetId = null;
-
   try {
     sourceFile = DriveApp.getFileById(fileId);
 
@@ -119,7 +175,6 @@ function importXlsxFileToInfoCore_(fileId) {
 
     const tempSpreadsheet = SpreadsheetApp.openById(tempSpreadsheetId);
     const sourceSheet = tempSpreadsheet.getSheets()[0];
-
     if (!sourceSheet) {
       throw new Error('Во временно конвертированном файле не найден ни один лист.');
     }
@@ -134,23 +189,20 @@ function importXlsxFileToInfoCore_(fileId) {
         targetSheetName: IMPORT_CONFIG.TARGET_SHEET_NAME,
         rows: 0,
         columns: INFO_SCHEMA.length,
-        message: 'Файл пустой. В лист Info записаны только заголовки.'
+        message: 'Файл пустой.\nВ лист Info записаны только заголовки.'
       };
     }
 
     const sourceHeaders = normalizeHeaderRow_(allValues[0]);
     const sourceIndexMap = buildSourceIndexMap_(sourceHeaders);
-
     // Данные только со 2 строки
     const sourceDataRows = allValues.slice(1);
-
     const mappedRows = sourceDataRows.map(function(row) {
       return INFO_SCHEMA.map(function(col) {
         const sourceIndex = sourceIndexMap[col.sourceHeader];
         return sourceIndex === undefined ? '' : safeCellValue_(row[sourceIndex]);
       });
     });
-
     writeInfoSheet_(targetSheet, mappedRows);
 
     SpreadsheetApp.flush();
@@ -162,8 +214,8 @@ function importXlsxFileToInfoCore_(fileId) {
       rows: mappedRows.length,
       columns: INFO_SCHEMA.length,
       message:
-        'Импорт завершён. Файл: ' + sourceFile.getName() +
-        '. Обработано строк: ' + mappedRows.length +
+        'Импорт завершён.\nФайл: ' + sourceFile.getName() +
+        '.\nОбработано строк: ' + mappedRows.length +
         ', столбцов: ' + INFO_SCHEMA.length + '.'
     };
   } catch (error) {
@@ -217,7 +269,6 @@ function clearSheetFully_(sheet) {
 
   const maxRows = sheet.getMaxRows();
   const maxCols = sheet.getMaxColumns();
-
   if (maxRows > 0 && maxCols > 0) {
     sheet.getRange(1, 1, maxRows, maxCols).clearDataValidations();
   }
@@ -228,7 +279,6 @@ function convertExcelToGoogleSheet_(file) {
     title: '[TEMP IMPORT] ' + file.getName(),
     mimeType: 'application/vnd.google-apps.spreadsheet'
   };
-
   const convertedFile = Drive.Files.copy(resource, file.getId());
   return convertedFile.id;
 }
@@ -247,7 +297,6 @@ function buildSourceIndexMap_(sourceHeaders) {
       map[header] = index;
     }
   });
-
   return map;
 }
 
@@ -261,29 +310,19 @@ function getInfoHeaders_() {
   });
 }
 
-/**
- * Полностью переписывает лист Info:
- * 1 строка — фиксированные заголовки из INFO_SCHEMA
- * со 2 строки — импортированные данные
- */
 function writeInfoSheet_(sheet, dataRows) {
   clearSheetFully_(sheet);
-
   const headers = getInfoHeaders_();
   const totalRows = Math.max(1, dataRows.length + 1);
   const totalCols = headers.length;
 
   ensureSheetSize_(sheet, totalRows, totalCols);
-
-  // Заголовки
   sheet.getRange(1, 1, 1, totalCols).setValues([headers]);
 
-  // Данные
   if (dataRows.length > 0) {
     sheet.getRange(2, 1, dataRows.length, totalCols).setValues(dataRows);
   }
 
-  // Закрепляем первую строку
   sheet.setFrozenRows(1);
 }
 
@@ -306,11 +345,9 @@ function getLatestXlsxFileFromFolder_(folderId) {
 
   let latestFile = null;
   let latestUpdated = 0;
-
   while (files.hasNext()) {
     const file = files.next();
     const name = file.getName().toLowerCase();
-
     if (!name.endsWith('.xlsx')) {
       continue;
     }

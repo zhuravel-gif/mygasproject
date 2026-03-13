@@ -1,0 +1,41 @@
+name: Build report in DuckDB
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build-report:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v5
+
+      - name: Setup Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: "3.12"
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Export Info from Google Sheets
+        env:
+          GOOGLE_SERVICE_ACCOUNT_JSON: ${{ secrets.GOOGLE_SERVICE_ACCOUNT_JSON }}
+          GOOGLE_SPREADSHEET_ID: ${{ secrets.GOOGLE_SPREADSHEET_ID }}
+        run: python scripts/export_info_from_sheets.py
+
+      - name: Check raw/output folders
+        run: |
+          ls -la data || true
+          ls -la data/raw || true
+          ls -la data/out || true
+
+      - name: Build report with DuckDB
+        run: python scripts/build_report.py
+
+      - name: Upload report to Google Sheets
+        env:
+          GOOGLE_SERVICE_ACCOUNT_JSON: ${{ secrets.GOOGLE_SERVICE_ACCOUNT_JSON }}
+          GOOGLE_SPREADSHEET_ID: ${{ secrets.GOOGLE_SPREADSHEET_ID }}
+        run: python scripts/push_report_to_sheets.py

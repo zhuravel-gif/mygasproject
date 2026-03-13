@@ -7,11 +7,13 @@ function onOpen(e) {
     .addItem('Импорт XLSX в Info (без окна)', 'runImportXlsxFromMenu')
     .addItem('Построить report', 'runBuildReportFromMenu')
     .addItem('Импорт + report', 'runRefreshAllFromMenu');
-  if (typeof showDashboard1Html === 'function') {
+
+  if (typeof openDashboard1WebAppFromMenu === 'function') {
     menu
       .addSeparator()
-      .addItem('Открыть Dashboard1 (HTML)', 'showDashboard1Html');
+      .addItem('Открыть Dashboard1 (WebApp)', 'openDashboard1WebAppFromMenu');
   }
+
   if (typeof runBuildDashboard1FromMenu === 'function') {
     menu
       .addSeparator()
@@ -39,4 +41,26 @@ function runRefreshAllFromMenu() {
 function runBuildDashboard1FromMenu() {
   const result = buildDashboard1ForTrigger();
   SpreadsheetApp.getUi().alert('Dashboard1', result.message, SpreadsheetApp.getUi().ButtonSet.OK);
+}
+
+function openDashboard1WebAppFromMenu() {
+  const url = dashboard1GetWebAppUrl_();
+
+  if (!url) {
+    SpreadsheetApp.getUi().alert(
+      'Dashboard1 WebApp',
+      'Не задан URL Web App. Сначала задеплойте Web App и сохраните ссылку в Script Properties с ключом DASHBOARD1_WEBAPP_URL.',
+      SpreadsheetApp.getUi().ButtonSet.OK
+    );
+    return;
+  }
+
+  const html = HtmlService.createHtmlOutput(
+    '<html><body><script>' +
+      'window.open("' + url + '", "_blank");' +
+      'google.script.host.close();' +
+    '</script></body></html>'
+  ).setWidth(220).setHeight(80);
+
+  SpreadsheetApp.getUi().showModalDialog(html, 'Открытие Dashboard1');
 }
