@@ -1,5 +1,4 @@
 function refreshAllDataForTrigger() {
-  // ИЗМЕНЕНИЕ: Триггер теперь берет файл из Gmail
   const importResult = importLatestXlsxFromGmailForTrigger();
 
   if (!importResult.ok) {
@@ -10,16 +9,6 @@ function refreshAllDataForTrigger() {
     };
   }
 
-  const reportResult = buildReportForTrigger();
-
-  if (!reportResult.ok) {
-    return {
-      ok: false,
-      stage: 'report',
-      message: 'Report не построен: ' + reportResult.message
-    };
-  }
-
   return {
     ok: true,
     stage: 'done',
@@ -27,7 +16,7 @@ function refreshAllDataForTrigger() {
       'Обновление завершено.\n' +
       'Импорт: ' + (importResult.fileName || 'без имени файла') +
       ', строк: ' + (importResult.rows || 0) + '.\n' +
-      'Report: строк: ' + (reportResult.rows || 0) + '.'
+      'Report теперь строится внешним DuckDB workflow.'
   };
 }
 
@@ -83,6 +72,7 @@ function logProjectTriggers() {
       ].join(' | ')
     );
   });
+
   return {
     ok: true,
     count: triggers.length,
@@ -96,6 +86,7 @@ function deleteAllProjectTriggers() {
   triggers.forEach(function(trigger) {
     ScriptApp.deleteTrigger(trigger);
   });
+
   return {
     ok: true,
     count: triggers.length,
