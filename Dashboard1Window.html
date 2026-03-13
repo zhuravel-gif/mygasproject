@@ -82,6 +82,44 @@
         flex-wrap: wrap;
       }
 
+      .topbar-controls {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        flex-wrap: wrap;
+        margin-top: 10px;
+      }
+
+      .mode-switch {
+        display: inline-flex;
+        background: rgba(255, 255, 255, 0.18);
+        border: 1px solid rgba(255, 255, 255, 0.22);
+        border-radius: 999px;
+        padding: 4px;
+        gap: 4px;
+      }
+
+      .mode-btn {
+        border: 0;
+        background: transparent;
+        color: #fff;
+        padding: 8px 14px;
+        border-radius: 999px;
+        cursor: pointer;
+        font-weight: 700;
+        font-size: 13px;
+      }
+
+      .mode-btn.active {
+        background: #fff;
+        color: var(--blue);
+      }
+
+      .mode-hint {
+        font-size: 12px;
+        opacity: 0.92;
+      }
+
       .status-wrap {
         display: flex;
         align-items: center;
@@ -106,151 +144,140 @@
       }
 
       .status-text {
-        min-width: 140px;
+        white-space: nowrap;
         font-size: 12px;
         opacity: 0.95;
-        text-align: right;
-        white-space: nowrap;
-      }
-
-      .nav-tabs {
-        display: flex;
-        gap: 8px;
-        flex-wrap: wrap;
-        margin-top: 14px;
-      }
-
-      .nav-tab {
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-        min-width: 120px;
-        padding: 9px 14px;
-        border-radius: 10px;
-        border: 1px solid rgba(255, 255, 255, 0.22);
-        background: rgba(255, 255, 255, 0.1);
-        color: #fff;
-        text-decoration: none;
-        font-size: 13px;
-        font-weight: 700;
-      }
-
-      .nav-tab.active {
-        background: #fff;
-        color: var(--blue);
-        border-color: #fff;
       }
 
       .content {
-        flex: 1 1 auto;
         min-height: 0;
+        flex: 1 1 auto;
         display: flex;
         flex-direction: column;
-        gap: 16px;
       }
 
       .page {
-        display: none;
-        flex: 1 1 auto;
         min-height: 0;
-        flex-direction: column;
-        gap: 16px;
+        height: 100%;
+        display: none;
       }
 
       .page.active {
         display: flex;
+        flex-direction: column;
+        gap: 16px;
       }
 
-      .kpis {
+      .nav-tabs {
+        display: flex;
+        gap: 10px;
+        flex-wrap: wrap;
+      }
+
+      .nav-tab {
+        background: var(--card);
+        color: var(--blue);
+        text-decoration: none;
+        border: 1px solid var(--line);
+        border-radius: 999px;
+        padding: 10px 14px;
+        font-size: 13px;
+        font-weight: 700;
+        box-shadow: var(--shadow);
+      }
+
+      .nav-tab.active {
+        background: var(--blue);
+        color: #fff;
+        border-color: var(--blue);
+      }
+
+      .kpi-grid {
         display: grid;
         grid-template-columns: repeat(4, minmax(0, 1fr));
         gap: 12px;
-        flex: 0 0 auto;
       }
 
       .kpi {
         background: var(--card);
         border: 1px solid var(--line);
         border-radius: 16px;
-        padding: 14px 16px;
+        padding: 16px;
         box-shadow: var(--shadow);
-        min-height: 94px;
       }
 
       .kpi .label {
-        font-size: 12px;
         color: var(--muted);
+        font-size: 12px;
         margin-bottom: 8px;
       }
 
       .kpi .value {
-        font-size: 26px;
+        font-size: 28px;
         font-weight: 700;
+        line-height: 1.1;
+        margin-bottom: 4px;
       }
 
       .kpi .subvalue {
-        margin-top: 6px;
-        font-size: 12px;
         color: var(--muted);
-      }
-
-      .filters {
-        background: var(--card);
-        border: 1px solid var(--line);
-        border-radius: 16px;
-        padding: 14px 16px;
-        box-shadow: var(--shadow);
-        flex: 0 0 auto;
-      }
-
-      .filters-grid {
-        display: grid;
-        grid-template-columns: repeat(7, minmax(0, 1fr));
-        gap: 10px;
-      }
-
-      .field label {
-        display: block;
         font-size: 12px;
-        color: var(--muted);
-        margin-bottom: 6px;
       }
 
-      .field select,
-      .field input {
-        width: 100%;
-        border: 1px solid var(--line);
-        border-radius: 10px;
-        padding: 9px 10px;
-        background: #fff;
-        font-size: 13px;
-        color: var(--text);
-      }
-
+      .filters-card,
       .table-card,
       .placeholder-card {
         background: var(--card);
         border: 1px solid var(--line);
         border-radius: 16px;
-        overflow: hidden;
         box-shadow: var(--shadow);
-        flex: 1 1 auto;
+      }
+
+      .filters-card {
+        padding: 14px 16px;
+      }
+
+      .filters-grid {
+        display: grid;
+        grid-template-columns: repeat(6, minmax(0, 1fr));
+        gap: 12px;
+      }
+
+      .field {
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+      }
+
+      .field label {
+        font-size: 12px;
+        color: var(--muted);
+        font-weight: 700;
+      }
+
+      select,
+      input[type="text"] {
+        width: 100%;
+        border: 1px solid var(--line);
+        border-radius: 10px;
+        padding: 10px 12px;
+        font-size: 13px;
+        outline: none;
+        background: #fff;
+      }
+
+      .table-card {
         min-height: 0;
+        flex: 1 1 auto;
         display: flex;
         flex-direction: column;
       }
 
-      .placeholder-card {
-        align-items: center;
-        justify-content: center;
-        padding: 32px;
-        text-align: center;
-      }
-
       .table-wrap {
-        flex: 1 1 auto;
         min-height: 0;
+        flex: 1 1 auto;
         overflow: auto;
+        border-radius: 16px 16px 0 0;
       }
 
       table {
@@ -258,61 +285,40 @@
         min-width: 100%;
         border-collapse: separate;
         border-spacing: 0;
+        font-size: 12px;
       }
 
       thead th {
         position: sticky;
         top: 0;
-        z-index: 5;
-        background: #e9f0f7;
-        color: #243b53;
-        font-size: 12px;
-        line-height: 1.15;
-        text-align: left;
-        padding: 9px 7px;
+        z-index: 3;
+        background: #eef4fb;
+        color: #16324f;
+        font-weight: 700;
+        text-align: center;
         border-bottom: 1px solid var(--line);
+        border-right: 1px solid var(--line);
+        padding: 10px 8px;
         white-space: normal;
-        word-break: break-word;
-        min-width: 72px;
-        max-width: 112px;
-        cursor: help;
+        line-height: 1.2;
       }
 
       tbody td {
-        padding: 8px 8px;
-        border-bottom: 1px solid #eef2f6;
-        font-size: 13px;
-        vertical-align: middle;
+        border-bottom: 1px solid #edf2f7;
+        border-right: 1px solid #edf2f7;
+        padding: 8px;
         white-space: nowrap;
         background: #fff;
       }
 
-      tbody tr:nth-child(even) td {
-        background: #fbfcfe;
-      }
-
       tbody tr:hover td {
-        background: #f2f7fc;
-      }
-
-      .num {
-        text-align: right;
-        font-variant-numeric: tabular-nums;
-      }
-
-      .muted {
-        color: var(--muted);
-      }
-
-      .cat-out {
-        color: #d88f8f;
+        background: #f8fbff;
       }
 
       .group-row td {
-        background: #f6f9fc !important;
+        background: #f4f8fc !important;
         font-weight: 700;
-        color: #29465b;
-        border-bottom: 1px solid #dbe6ef;
+        color: #24415e;
       }
 
       .group-toggle {
@@ -320,89 +326,28 @@
         user-select: none;
       }
 
-      .indent-1 { padding-left: 14px !important; }
-      .indent-2 { padding-left: 26px !important; }
-      .indent-3 { padding-left: 38px !important; }
-      .indent-4 { padding-left: 50px !important; }
+      .indent-1 { padding-left: 12px !important; }
+      .indent-2 { padding-left: 24px !important; }
+      .indent-3 { padding-left: 36px !important; }
+      .indent-4 { padding-left: 48px !important; }
 
-      .badge {
-        display: inline-block;
-        border-radius: 999px;
-        padding: 3px 8px;
-        font-size: 11px;
-        font-weight: 700;
-      }
-
-      .badge.ok { background: #e8f5e9; color: #2e7d32; }
-      .badge.warn { background: #fff4db; color: #9a6700; }
-      .badge.risk { background: #fde7e7; color: #b42318; }
-
-      .spark {
-        display: flex;
-        align-items: end;
-        gap: 2px;
-        height: 28px;
-        min-width: 110px;
-      }
-
-      .spark span {
-        width: 5px;
-        background: linear-gradient(180deg, #7aa6d8 0%, #1f4e78 100%);
-        border-radius: 2px 2px 0 0;
-        display: inline-block;
-      }
-
-      .loading, .empty {
-        padding: 24px;
-        text-align: center;
-        color: var(--muted);
-      }
-
-      .footer-actions {
-        display: flex;
-        justify-content: flex-end;
-        gap: 10px;
-        padding: 14px 16px;
-        border-top: 1px solid var(--line);
-        background: #fcfdff;
-        flex: 0 0 auto;
-      }
-
-      button {
-        border: none;
-        border-radius: 10px;
-        padding: 10px 14px;
-        font-size: 13px;
-        cursor: pointer;
-      }
-
-      .btn-secondary {
-        background: #eef3f8;
-        color: #243b53;
-      }
-
-      .btn-primary {
-        background: #1f4e78;
-        color: #fff;
-      }
-
-      .btn-light {
-        background: rgba(255, 255, 255, 0.14);
-        color: #fff;
-        border: 1px solid rgba(255, 255, 255, 0.22);
-      }
-
-      .sticky-1, .sticky-2, .sticky-3, .sticky-4, .sticky-5, .sticky-last {
+      .sticky-1,
+      .sticky-2,
+      .sticky-3,
+      .sticky-4,
+      .sticky-5,
+      .sticky-last {
         position: sticky;
-        z-index: 4;
+        z-index: 2;
+        background: inherit;
       }
 
-      .sticky-1 { left: 0; min-width: 118px; max-width: 118px; }
-      .sticky-2 { left: 118px; min-width: 220px; max-width: 220px; }
-      .sticky-3 { left: 338px; min-width: 104px; max-width: 104px; }
-      .sticky-4 { left: 442px; min-width: 104px; max-width: 104px; }
-      .sticky-5 { left: 546px; min-width: 92px; max-width: 92px; }
-      .sticky-last { right: 0; min-width: 92px; max-width: 92px; box-shadow: -4px 0 8px rgba(15, 23, 42, 0.04); }
+      .sticky-1 { left: 0; min-width: 110px; max-width: 110px; }
+      .sticky-2 { left: 110px; min-width: 250px; max-width: 250px; }
+      .sticky-3 { left: 360px; min-width: 110px; max-width: 110px; }
+      .sticky-4 { left: 470px; min-width: 110px; max-width: 110px; }
+      .sticky-5 { left: 580px; min-width: 120px; max-width: 120px; }
+      .sticky-last { right: 0; background: #fff; box-shadow: -6px 0 10px rgba(15, 23, 42, 0.05); }
 
       thead .sticky-1,
       thead .sticky-2,
@@ -410,59 +355,98 @@
       thead .sticky-4,
       thead .sticky-5,
       thead .sticky-last {
-        z-index: 7;
-        background: #e9f0f7;
-      }
-
-      tbody td.sticky-1,
-      tbody td.sticky-2,
-      tbody td.sticky-3,
-      tbody td.sticky-4,
-      tbody td.sticky-5,
-      tbody td.sticky-last {
-        background: inherit;
+        background: #eef4fb;
       }
 
       .w-80 { min-width: 80px; max-width: 80px; }
-      .w-90 { min-width: 86px; max-width: 86px; }
-      .w-100 { min-width: 96px; max-width: 96px; }
-      .w-110 { min-width: 104px; max-width: 104px; }
-      .w-120 { min-width: 112px; max-width: 112px; }
-      .w-140 { min-width: 140px; max-width: 140px; }
+      .w-90 { min-width: 90px; max-width: 90px; }
+      .w-100 { min-width: 100px; max-width: 100px; }
+      .w-120 { min-width: 120px; max-width: 120px; }
+      .num { text-align: right; }
+      .muted { color: var(--muted); }
 
-      @media (max-width: 1500px) {
-        .filters-grid {
-          grid-template-columns: repeat(4, minmax(0, 1fr));
-        }
-
-        .kpis {
-          grid-template-columns: repeat(2, minmax(0, 1fr));
-        }
+      .spark {
+        display: flex;
+        align-items: flex-end;
+        gap: 2px;
+        height: 28px;
       }
 
-      @media (max-width: 900px) {
-        .app {
-          padding: 10px;
-        }
+      .spark span {
+        flex: 1 1 auto;
+        min-width: 2px;
+        border-radius: 2px 2px 0 0;
+        background: #5b8db8;
+      }
 
-        .filters-grid,
-        .kpis {
-          grid-template-columns: 1fr;
-        }
+      .badge {
+        display: inline-block;
+        min-width: 52px;
+        text-align: center;
+        border-radius: 999px;
+        padding: 4px 8px;
+        font-weight: 700;
+      }
 
-        .topbar-head {
-          flex-direction: column;
-          align-items: stretch;
-        }
+      .badge.ok {
+        background: var(--green-soft);
+        color: #256029;
+      }
 
-        .status-wrap {
-          flex-direction: column;
-          align-items: stretch;
-        }
+      .badge.warn {
+        background: var(--amber-soft);
+        color: #8d6b00;
+      }
 
-        .status-text {
-          text-align: left;
-        }
+      .badge.risk {
+        background: var(--danger-soft);
+        color: var(--danger);
+      }
+
+      .cat-out td {
+        color: #b26b6b;
+      }
+
+      .loading,
+      .empty {
+        padding: 30px 20px;
+        text-align: center;
+        color: var(--muted);
+      }
+
+      .footer-actions {
+        border-top: 1px solid var(--line);
+        padding: 12px 16px;
+        display: flex;
+        justify-content: flex-end;
+      }
+
+      .btn-secondary {
+        border: 1px solid var(--line);
+        background: #fff;
+        color: var(--text);
+        border-radius: 10px;
+        padding: 10px 14px;
+        cursor: pointer;
+        font-weight: 700;
+      }
+
+      .placeholder-card {
+        min-height: 240px;
+        display: grid;
+        place-items: center;
+        padding: 24px;
+      }
+
+      @media (max-width: 1200px) {
+        .kpi-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+        .filters-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+      }
+
+      @media (max-width: 760px) {
+        .app { padding: 10px; }
+        .kpi-grid,
+        .filters-grid { grid-template-columns: 1fr; }
       }
     </style>
   </head>
@@ -471,29 +455,36 @@
       <div class="topbar">
         <div class="topbar-head">
           <div>
-            <h1>Дашборды · WebApp</h1>
-            <p id="metaText">Загрузка данных…</p>
+            <h1>Дашборды</h1>
+            <p id="metaText">Подготовка данных…</p>
           </div>
-          <div class="topbar-actions">
-            <button class="btn-light" onclick="reloadData()">Обновить</button>
-          </div>
-        </div>
 
-        <div class="status-wrap">
-          <div class="status-bar">
-            <div id="statusFill" class="status-fill"></div>
+          <div class="topbar-actions">
+            <div class="status-wrap">
+              <div class="status-bar">
+                <div id="statusFill" class="status-fill"></div>
+              </div>
+              <div id="statusText" class="status-text">Ожидание…</div>
+            </div>
           </div>
-          <div id="statusText" class="status-text">Подготовка…</div>
         </div>
 
         <div class="nav-tabs" id="navTabs"></div>
+
+        <div class="topbar-controls">
+          <div class="mode-switch">
+            <button id="mode14Btn" class="mode-btn active" type="button" onclick="setPeriodMode('14')">14 дней</button>
+            <button id="mode30Btn" class="mode-btn" type="button" onclick="setPeriodMode('30')">30 дней</button>
+          </div>
+          <div id="modeHint" class="mode-hint">Сейчас показаны метрики и тренд за 14 дней.</div>
+        </div>
       </div>
 
       <div class="content">
         <section id="page-dashboard1" class="page active">
-          <div class="kpis" id="kpis"></div>
+          <div class="kpi-grid" id="kpis"></div>
 
-          <div class="filters">
+          <div class="filters-card">
             <div class="filters-grid">
               <div class="field">
                 <label>Категория</label>
@@ -504,25 +495,25 @@
                 <select id="filterBrand"></select>
               </div>
               <div class="field">
-                <label>Группа 1</label>
+                <label>Товарная группа 1</label>
                 <select id="filterTg1"></select>
               </div>
               <div class="field">
-                <label>Группа 2</label>
+                <label>Товарная группа 2</label>
                 <select id="filterTg2"></select>
               </div>
               <div class="field">
-                <label>Группа 3</label>
+                <label>Товарная группа 3</label>
                 <select id="filterTg3"></select>
               </div>
               <div class="field">
-                <label>Только запас &lt; 30</label>
+                <label>Запас &lt; 30</label>
                 <select id="filterZapas30">
                   <option value="">Все</option>
                   <option value="Да">Да</option>
                 </select>
               </div>
-              <div class="field">
+              <div class="field" style="grid-column: 1 / -1;">
                 <label>Поиск</label>
                 <input id="searchText" type="text" placeholder="Наименование, артикул, бренд…" />
               </div>
@@ -575,27 +566,63 @@
         { id: 'dashboard3', title: 'Dashboard3' }
       ];
 
-      const TABLE_COLUMNS = [
-        { key: 'hierarchy', label: 'Иерархия', className: 'sticky-1', help: 'Уровень группировки: Бренд → Группа 1 → Группа 2 → Группа 3 → SKU. Источник: поля report Бренд, Товарная группа 1/2/3.' },
-        { key: 'nom', label: 'Наименование', className: 'sticky-2', help: 'Источник: report → Наименование.' },
-        { key: 'art1C', label: 'Артикул', className: 'sticky-3', help: 'Источник: report → Артикул.' },
-        { key: 'artwb', label: 'Артикул WB', className: 'sticky-4', help: 'Источник: report → Артикул ВБ.' },
-        { key: 'cat', label: 'Категория', className: 'sticky-5', help: 'Источник: report → Категория товаров.' },
-        { key: 'order', label: 'Заказано\nпоставщику', className: 'num w-100', help: 'Источник: report → Заказано поставщику.' },
-        { key: 'inwork', label: 'В\nпроизводстве', className: 'num w-100', help: 'Источник: report → В производстве.' },
-        { key: 'rawstock', label: 'Остаток\nсырья', className: 'num w-90', help: 'Источник: report → Остаток сырья в шт.' },
-        { key: 'stock', label: 'Готовая\nпродукция', className: 'num w-90', help: 'Источник: report → Готовая продукция на складе.' },
-        { key: 'reserved', label: 'В\nрезерве', className: 'num w-90', help: 'Источник: report → В резерве.' },
-        { key: 'shipped', label: 'Отгружено\nна РВБ', className: 'num w-100', help: 'Источник: report → Отгружено на РВБ.' },
-        { key: 'fbostock', label: 'ФБО\nостаток', className: 'num w-90', help: 'Источник: report → ФБО остаток.' },
-        { key: 'ordersFBO', label: 'Заказы\nFBO', className: 'num w-80', help: 'Источник: report → ordersFBO.' },
-        { key: 'ordersFBS', label: 'Заказы\nFBS', className: 'num w-80', help: 'Источник: report → ordersFBS.' },
-        { key: 'orderssum', label: 'Заказы\nвсего', className: 'num w-80', help: 'Источник: report → orderssum = ordersFBO + ordersFBS.' },
-        { key: 'trend14d', label: 'Тренд 14д', className: 'w-120', help: 'Источник: report → trend14d. Показывает ряд заказов за последние 14 дней.' },
-        { key: 'sumstock', label: 'Суммарный\nостаток', className: 'num w-90', help: 'Источник: report → sumstock = stock + reserved + shipped + fbostock.' },
-        { key: 'dayorders', label: 'Средние\nзаказы/день', className: 'num w-90', help: 'Источник: report → dayorders = total orders за 14 дней / число дней, в которые были заказы.' },
-        { key: 'zapas', label: 'Запас,\nдней', className: 'num w-90 sticky-last', help: 'Источник: report → zapas = sumstock / dayorders. Колонка закреплена справа.' }
-      ];
+      let currentMode = '14';
+
+      function getColumnsForMode() {
+        const is30 = currentMode === '30';
+
+        return [
+          { key: 'hierarchy', label: 'Иерархия', className: 'sticky-1', help: 'Уровень группировки: Бренд → Группа 1 → Группа 2 → Группа 3 → SKU. Источник: поля report Бренд, Товарная группа 1/2/3.' },
+          { key: 'nom', label: 'Наименование', className: 'sticky-2', help: 'Источник: report → Наименование.' },
+          { key: 'art1C', label: 'Артикул', className: 'sticky-3', help: 'Источник: report → Артикул.' },
+          { key: 'artwb', label: 'Артикул WB', className: 'sticky-4', help: 'Источник: report → Артикул ВБ.' },
+          { key: 'cat', label: 'Категория', className: 'sticky-5', help: 'Источник: report → Категория товаров.' },
+          { key: 'order', label: 'Заказано\nпоставщику', className: 'num w-100', help: 'Источник: report → Заказано поставщику.' },
+          { key: 'inwork', label: 'В\nпроизводстве', className: 'num w-100', help: 'Источник: report → В производстве.' },
+          { key: 'rawstock', label: 'Остаток\nсырья', className: 'num w-90', help: 'Источник: report → Остаток сырья в шт.' },
+          { key: 'stock', label: 'Готовая\nпродукция', className: 'num w-90', help: 'Источник: report → Готовая продукция на складе.' },
+          { key: 'reserved', label: 'В\nрезерве', className: 'num w-90', help: 'Источник: report → В резерве.' },
+          { key: 'shipped', label: 'Отгружено\nна РВБ', className: 'num w-100', help: 'Источник: report → Отгружено на РВБ.' },
+          { key: 'fbostock', label: 'ФБО\nостаток', className: 'num w-90', help: 'Источник: report → ФБО остаток.' },
+          {
+            key: 'ordersFBO',
+            label: is30 ? 'Заказы\nFBO 30д' : 'Заказы\nFBO 14д',
+            className: 'num w-80',
+            help: is30 ? 'Источник: report → ordersFBO30.' : 'Источник: report → ordersFBO.'
+          },
+          {
+            key: 'ordersFBS',
+            label: is30 ? 'Заказы\nFBS 30д' : 'Заказы\nFBS 14д',
+            className: 'num w-80',
+            help: is30 ? 'Источник: report → ordersFBS30.' : 'Источник: report → ordersFBS.'
+          },
+          {
+            key: 'orderssum',
+            label: is30 ? 'Заказы\nвсего 30д' : 'Заказы\nвсего 14д',
+            className: 'num w-80',
+            help: is30 ? 'Источник: report → orderssum30.' : 'Источник: report → orderssum.'
+          },
+          {
+            key: 'trend',
+            label: is30 ? 'Тренд 30д' : 'Тренд 14д',
+            className: 'w-120',
+            help: is30 ? 'Источник: report → trend30d. Ряд заказов за последние 30 дней.' : 'Источник: report → trend14d. Ряд заказов за последние 14 дней.'
+          },
+          { key: 'sumstock', label: 'Суммарный\nостаток', className: 'num w-90', help: 'Источник: report → sumstock = stock + reserved + shipped + fbostock.' },
+          {
+            key: 'dayorders',
+            label: is30 ? 'Средние\nзаказы/день 30д' : 'Средние\nзаказы/день 14д',
+            className: 'num w-100',
+            help: is30 ? 'Источник: report → dayorders30.' : 'Источник: report → dayorders.'
+          },
+          {
+            key: 'zapas',
+            label: is30 ? 'Запас,\nдней 30д' : 'Запас,\nдней 14д',
+            className: 'num w-100 sticky-last',
+            help: is30 ? 'Источник: report → zapas30.' : 'Источник: report → zapas.'
+          }
+        ];
+      }
 
       let rawData = null;
       let expanded = new Set();
@@ -607,6 +634,7 @@
         initPages();
         bindEvents();
         renderTableHead();
+        updateModeControls();
         if (ACTIVE_PAGE === 'dashboard1') {
           loadData();
         } else {
@@ -632,11 +660,29 @@
       }
 
       function renderTableHead() {
+        const columns = getColumnsForMode();
         const row = document.getElementById('tableHeadRow');
-        row.innerHTML = TABLE_COLUMNS.map(col => {
+        row.innerHTML = columns.map(col => {
           const className = col.className ? ` class="${col.className}"` : '';
           return `<th${className} title="${escapeHtml(col.help)}">${col.label.replaceAll('\n', '<br>')}</th>`;
         }).join('');
+      }
+
+      function updateModeControls() {
+        document.getElementById('mode14Btn').classList.toggle('active', currentMode === '14');
+        document.getElementById('mode30Btn').classList.toggle('active', currentMode === '30');
+        document.getElementById('modeHint').textContent =
+          currentMode === '30'
+            ? 'Сейчас показаны метрики, средние продажи, запас и тренд за 30 дней.'
+            : 'Сейчас показаны метрики, средние продажи, запас и тренд за 14 дней.';
+      }
+
+      function setPeriodMode(mode) {
+        currentMode = String(mode) === '30' ? '30' : '14';
+        updateModeControls();
+        renderTableHead();
+        beginProgress('Переключение периода…', 20);
+        render();
       }
 
       function bindEvents() {
@@ -684,7 +730,7 @@
         rawData = data;
 
         document.getElementById('metaText').textContent =
-          `Обновлено: ${data.generatedAt} · Период тренда: последние ${data.lookbackDays} дней`;
+          `Обновлено: ${data.generatedAt} · Источник: report · Доступны режимы 14 и 30 дней`;
 
         fillSelect('filterCat', data.filters.cat, 'Все категории');
         fillSelect('filterBrand', data.filters.brandinfo, 'Все бренды');
@@ -708,12 +754,14 @@
       }
 
       function renderKpis(summary) {
+        const suffix = currentMode === '30' ? '30д' : '14д';
+
         const root = document.getElementById('kpis');
         root.innerHTML = `
           <div class="kpi">
             <div class="label">Turnover, дней</div>
             <div class="value">${fmtFloat(summary.turnover)}</div>
-            <div class="subvalue">sumstock / dayorders по отфильтрованным строкам</div>
+            <div class="subvalue">sumstock / dayorders${currentMode === '30' ? '30' : ''} по отфильтрованным строкам</div>
           </div>
           <div class="kpi">
             <div class="label">Суммарный остаток</div>
@@ -723,7 +771,7 @@
           <div class="kpi">
             <div class="label">Уходимость, шт/день</div>
             <div class="value">${fmtFloat(summary.totalDayorders)}</div>
-            <div class="subvalue">Сумма dayorders по фильтрам</div>
+            <div class="subvalue">Сумма dayorders за ${suffix} по фильтрам</div>
           </div>
           <div class="kpi">
             <div class="label">SKU в выборке</div>
@@ -765,10 +813,11 @@
         setProgress('Подготовка строк…', 65);
 
         const rows = applyFilters(rawData.rows);
-        const summary = summarizeRows(rows);
+        const summary = currentMode === '30' ? rawData.summary30 : rawData.summary14;
+        const filteredSummary = summarizeRows(rows);
         const tree = buildTree(rows);
 
-        renderKpis(summary);
+        renderKpis(filteredSummary);
         setProgress('Построение таблицы…', 82);
 
         const tbody = document.getElementById('tableBody');
@@ -795,12 +844,13 @@
         const search = document.getElementById('searchText').value.trim().toLowerCase();
 
         return rows.filter(r => {
+          const zapasFlag = currentMode === '30' ? r.zapasFlag30 : r.zapasFlag14;
           if (cat && r.cat !== cat) return false;
           if (brand && r.brandinfo !== brand) return false;
           if (tg1 && r.tg1 !== tg1) return false;
           if (tg2 && r.tg2 !== tg2) return false;
           if (tg3 && r.tg3 !== tg3) return false;
-          if (zapas30 && r.zapasFlag !== zapas30) return false;
+          if (zapas30 && zapasFlag !== zapas30) return false;
           if (search && !String(r.searchText || '').includes(search)) return false;
           return true;
         });
@@ -808,15 +858,18 @@
 
       function summarizeRows(rows) {
         const summary = rows.reduce((acc, row) => {
+          const dayorders = currentMode === '30' ? row.dayorders30 : row.dayorders14;
+          const zapas = currentMode === '30' ? row.zapas30 : row.zapas14;
+
           acc.totalSku += 1;
           acc.sumstock += Number(row.sumstock || 0);
 
-          if (row.dayorders !== null && Number(row.dayorders) > 0) {
-            acc.totalDayorders += Number(row.dayorders);
+          if (dayorders !== null && Number(dayorders) > 0) {
+            acc.totalDayorders += Number(dayorders);
             acc.turnoverSku += 1;
           }
 
-          if (row.zapas !== null && Number(row.zapas) < 30) {
+          if (zapas !== null && Number(zapas) < 30) {
             acc.lowStockSku += 1;
           }
 
@@ -875,9 +928,10 @@
       }
 
       function renderGroupRowHtml(label, depth, groupId, isOpen) {
+        const columnsCount = getColumnsForMode().length;
         return `
           <tr class="group-row">
-            <td colspan="19" class="group-toggle indent-${Math.min(depth + 1, 4)}" data-group-id="${escapeHtml(groupId)}">
+            <td colspan="${columnsCount}" class="group-toggle indent-${Math.min(depth + 1, 4)}" data-group-id="${escapeHtml(groupId)}">
               ${isOpen ? '▾' : '▸'} ${escapeHtml(label)}
             </td>
           </tr>
@@ -893,6 +947,13 @@
       }
 
       function renderDataRowHtml(r) {
+        const ordersFBO = currentMode === '30' ? r.ordersFBO30 : r.ordersFBO14;
+        const ordersFBS = currentMode === '30' ? r.ordersFBS30 : r.ordersFBS14;
+        const orderssum = currentMode === '30' ? r.orderssum30 : r.orderssum14;
+        const trend = currentMode === '30' ? r.trend30d : r.trend14d;
+        const dayorders = currentMode === '30' ? r.dayorders30 : r.dayorders14;
+        const zapas = currentMode === '30' ? r.zapas30 : r.zapas14;
+
         const rowClass = r.cat === 'Выведен' ? ' class="cat-out"' : '';
         return `
           <tr${rowClass}>
@@ -908,13 +969,13 @@
             <td class="num w-90">${fmtInt(r.reserved)}</td>
             <td class="num w-100">${fmtInt(r.shipped)}</td>
             <td class="num w-90">${fmtInt(r.fbostock)}</td>
-            <td class="num w-80">${fmtInt(r.ordersFBO)}</td>
-            <td class="num w-80">${fmtInt(r.ordersFBS)}</td>
-            <td class="num w-80">${fmtInt(r.orderssum)}</td>
-            <td class="w-120">${renderSpark(r.trend14d)}</td>
+            <td class="num w-80">${fmtInt(ordersFBO)}</td>
+            <td class="num w-80">${fmtInt(ordersFBS)}</td>
+            <td class="num w-80">${fmtInt(orderssum)}</td>
+            <td class="w-120">${renderSpark(trend)}</td>
             <td class="num w-90">${fmtInt(r.sumstock)}</td>
-            <td class="num w-90">${fmtFloat(r.dayorders)}</td>
-            <td class="num w-90 sticky-last">${renderZapas(r.zapas)}</td>
+            <td class="num w-100">${fmtFloat(dayorders)}</td>
+            <td class="num w-100 sticky-last">${renderZapas(zapas)}</td>
           </tr>
         `;
       }

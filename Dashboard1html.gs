@@ -43,14 +43,15 @@ function getDashboard1HtmlData() {
 
   const rows = dashboardHtmlBuildRows_(reportData.rows, reportHeaderMap);
   const filters = dashboardHtmlBuildFilterValues_(rows);
-  const summary = dashboardHtmlBuildSummary_(rows);
+  const summary14 = dashboardHtmlBuildSummaryByMode_(rows, '14');
+  const summary30 = dashboardHtmlBuildSummaryByMode_(rows, '30');
 
   return {
     generatedAt: Utilities.formatDate(new Date(), Session.getScriptTimeZone(), 'dd.MM.yyyy HH:mm:ss'),
-    lookbackDays: DASHBOARD_LOOKBACK_DAYS,
     rows: rows,
     filters: filters,
-    summary: summary
+    summary14: summary14,
+    summary30: summary30
   };
 }
 
@@ -97,9 +98,16 @@ function dashboardHtmlValidateRequiredReportHeaders_(map) {
     'ordersFBO',
     'ordersFBS',
     'orderssum',
+    'ordersFBO30',
+    'ordersFBS30',
+    'orderssum30',
     'sumstock',
     'dayorders',
-    'zapas'
+    'dayorders30',
+    'zapas',
+    'zapas30',
+    'trend14d',
+    'trend30d'
   ];
 
   required.forEach(function(name) {
@@ -110,13 +118,17 @@ function dashboardHtmlValidateRequiredReportHeaders_(map) {
 }
 
 function dashboardHtmlBuildRows_(reportRows, reportHeaderMap) {
-  const trendIndex = reportHeaderMap.trend14d;
+  const trend14Index = reportHeaderMap.trend14d;
+  const trend30Index = reportHeaderMap.trend30d;
 
   const rows = reportRows.map(function(reportRow, idx) {
-    const dayordersNum = dashboardHtmlToNumberOrNull_(reportRow[reportHeaderMap.dayorders]);
+    const dayorders14Num = dashboardHtmlToNumberOrNull_(reportRow[reportHeaderMap.dayorders]);
+    const dayorders30Num = dashboardHtmlToNumberOrNull_(reportRow[reportHeaderMap.dayorders30]);
     const sumstockNum = dashboardHtmlToNumber_(reportRow[reportHeaderMap.sumstock]);
-    const zapasNum = dashboardHtmlToNumberOrNull_(reportRow[reportHeaderMap.zapas]);
-    const trend14d = dashboardHtmlParseTrend14d_(trendIndex !== undefined ? reportRow[trendIndex] : '');
+    const zapas14Num = dashboardHtmlToNumberOrNull_(reportRow[reportHeaderMap.zapas]);
+    const zapas30Num = dashboardHtmlToNumberOrNull_(reportRow[reportHeaderMap.zapas30]);
+    const trend14d = dashboardHtmlParseTrendSeries_(trend14Index !== undefined ? reportRow[trend14Index] : '', 14);
+    const trend30d = dashboardHtmlParseTrendSeries_(trend30Index !== undefined ? reportRow[trend30Index] : '', 30);
 
     const row = {
       id: idx + 1,
@@ -135,17 +147,25 @@ function dashboardHtmlBuildRows_(reportRows, reportHeaderMap) {
       reserved: dashboardHtmlToNumber_(reportRow[reportHeaderMap['В резерве']]),
       shipped: dashboardHtmlToNumber_(reportRow[reportHeaderMap['Отгружено на РВБ']]),
       fbostock: dashboardHtmlToNumber_(reportRow[reportHeaderMap['ФБО остаток']]),
-      ordersFBO: dashboardHtmlToNumber_(reportRow[reportHeaderMap.ordersFBO]),
-      ordersFBS: dashboardHtmlToNumber_(reportRow[reportHeaderMap.ordersFBS]),
-      orderssum: dashboardHtmlToNumber_(reportRow[reportHeaderMap.orderssum]),
+
+      ordersFBO14: dashboardHtmlToNumber_(reportRow[reportHeaderMap.ordersFBO]),
+      ordersFBS14: dashboardHtmlToNumber_(reportRow[reportHeaderMap.ordersFBS]),
+      orderssum14: dashboardHtmlToNumber_(reportRow[reportHeaderMap.orderssum]),
+
+      ordersFBO30: dashboardHtmlToNumber_(reportRow[reportHeaderMap.ordersFBO30]),
+      ordersFBS30: dashboardHtmlToNumber_(reportRow[reportHeaderMap.ordersFBS30]),
+      orderssum30: dashboardHtmlToNumber_(reportRow[reportHeaderMap.orderssum30]),
+
       sumstock: sumstockNum,
-      dayorders: dayordersNum,
-      zapas: zapasNum,
-      zapasFlag: zapasNum !== null && zapasNum < 30 ? 'Да' : 'Нет',
+      dayorders14: dayorders14Num,
+      dayorders30: dayorders30Num,
+      zapas14: zapas14Num,
+      zapas30: zapas30Num,
       trend14d: trend14d,
-      hasTurnover: dayordersNum !== null && dayordersNum > 0,
-      turnoverBaseStock: sumstockNum,
-      turnoverBaseDemand: dayordersNum !== null && dayordersNum > 0 ? dayordersNum : 0
+      trend30d: trend30d,
+
+      zapasFlag14: zapas14Num !== null && zapas14Num < 30 ? 'Да' : 'Нет',
+      zapasFlag30: zapas30Num !== null && zapas30Num < 30 ? 'Да' : 'Нет'
     };
 
     row.searchText = [
@@ -173,18 +193,18 @@ function dashboardHtmlBuildRows_(reportRows, reportHeaderMap) {
   return rows;
 }
 
-function dashboardHtmlParseTrend14d_(value) {
+function dashboardHtmlParseTrendSeries_(value, expectedLength) {
   if (!value) {
-    return new Array(DASHBOARD_LOOKBACK_DAYS).fill(0);
+    return new Array(expectedLength).fill(0);
   }
 
   const raw = String(value).split(',');
-  const result = raw.slice(0, DASHBOARD_LOOKBACK_DAYS).map(function(item) {
+  const result = raw.slice(0, expectedLength).map(function(item) {
     const num = Number(item);
     return isNaN(num) ? 0 : num;
   });
 
-  while (result.length < DASHBOARD_LOOKBACK_DAYS) {
+  while (result.length < expectedLength) {
     result.push(0);
   }
 
@@ -212,11 +232,9 @@ function dashboardHtmlBuildFilterValues_(rows) {
   };
 }
 
-function dashboardHtmlBuildSummary_(rows) {
-  return dashboardHtmlSummarizeRows_(rows);
-}
+function dashboardHtmlBuildSummaryByMode_(rows, mode) {
+  const is30 = String(mode) === '30';
 
-function dashboardHtmlSummarizeRows_(rows) {
   const summary = {
     totalSku: rows.length,
     turnoverSku: 0,
@@ -227,14 +245,17 @@ function dashboardHtmlSummarizeRows_(rows) {
   };
 
   rows.forEach(function(row) {
+    const dayorders = is30 ? row.dayorders30 : row.dayorders14;
+    const zapas = is30 ? row.zapas30 : row.zapas14;
+
     summary.sumstock += dashboardHtmlToNumber_(row.sumstock);
 
-    if (row.dayorders !== null && row.dayorders > 0) {
-      summary.totalDayorders += row.dayorders;
+    if (dayorders !== null && dayorders > 0) {
+      summary.totalDayorders += dayorders;
       summary.turnoverSku += 1;
     }
 
-    if (row.zapas !== null && row.zapas < 30) {
+    if (zapas !== null && zapas < 30) {
       summary.lowStockSku += 1;
     }
   });
