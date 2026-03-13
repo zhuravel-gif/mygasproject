@@ -33,7 +33,10 @@ orders_filtered AS (
   SELECT
     trim(CAST(nmid AS VARCHAR)) AS nmid,
     lower(trim(CAST(warehousetype AS VARCHAR))) AS warehousetype,
-    TRY_CAST(date AS DATE) AS order_date
+    COALESCE(
+      TRY_CAST(date AS DATE),
+      CAST(TRY_CAST(date AS TIMESTAMP) AS DATE)
+    ) AS order_date
   FROM orders_src
   WHERE COALESCE(TRY_CAST(iscancel AS INTEGER), 1) = 0
     AND trim(CAST(nmid AS VARCHAR)) <> ''
@@ -46,14 +49,26 @@ orders_stats AS (
     SUM(CASE WHEN warehousetype = 'склад wb' THEN 1 ELSE 0 END) AS ordersFBO,
     SUM(CASE WHEN warehousetype = 'склад продавца' THEN 1 ELSE 0 END) AS ordersFBS,
     COUNT(*) AS orderssum,
+
     COUNT(DISTINCT CASE
       WHEN order_date >= current_date - INTERVAL 13 DAY THEN order_date
       ELSE NULL
-    END) AS activeDays,
+    END) AS activeDays14,
+
     SUM(CASE
       WHEN order_date >= current_date - INTERVAL 13 DAY THEN 1
       ELSE 0
-    END) AS total14
+    END) AS total14,
+
+    COUNT(DISTINCT CASE
+      WHEN order_date >= current_date - INTERVAL 29 DAY THEN order_date
+      ELSE NULL
+    END) AS activeDays30,
+
+    SUM(CASE
+      WHEN order_date >= current_date - INTERVAL 29 DAY THEN 1
+      ELSE 0
+    END) AS total30
   FROM orders_filtered
   GROUP BY nmid
 )
@@ -91,25 +106,31 @@ SELECT
     i."Отгружено на РВБ" +
     i."ФБО остаток"
   ) AS sumstock,
+
   CASE
-    WHEN COALESCE(o.activeDays, 0) > 0
-      THEN ROUND(o.total14 * 1.0 / o.activeDays, 6)
+    WHEN COALESCE(o.activeDays30, 0) > 0
+      THEN ROUND(o.total30 * 1.0 / o.activeDays30, 6)
     ELSE NULL
   END AS dayorders,
+
   CASE
-    WHEN COALESCE(o.activeDays, 0) > 0
-      AND o.total14 > 0
+    WHEN COALESCE(o.activeDays30, 0) > 0
+      AND o.total30 > 0
       THEN ROUND(
         (
           i."Готовая продукция на складе" +
           i."В резерве" +
           i."Отгружено на РВБ" +
           i."ФБО остаток"
-        ) / (o.total14 * 1.0 / o.activeDays),
+        ) / (o.total30 * 1.0 / o.activeDays30),
         6
       )
     ELSE NULL
-  END AS zapas
+  END AS zapas,
+
+  COALESCE(o.total14, 0) AS trend14d,
+  COALESCE(o.total30, 0) AS trend30d
+
 FROM info_filtered i
 LEFT JOIN orders_stats o
   ON o.nmid = i.artwb
