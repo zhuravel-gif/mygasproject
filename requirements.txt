@@ -1,0 +1,5 @@
+duckdb==1.4.0
+gspread==6.2.1
+google-auth==2.40.3
+pandas==2.3.2
+pyarrow==21.0.0
