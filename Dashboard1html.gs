@@ -1,20 +1,25 @@
-function doGet(e) {
-  const page = e && e.parameter && e.parameter.page
-    ? String(e.parameter.page).toLowerCase()
-    : 'dashboard1';
+// 2. Выбираем правильный HTML-файл в зависимости от параметра page
+  let templateFile = 'Dashboard1Window'; // по умолчанию
+  if (page === 'dashboard2') {
+    templateFile = 'Dashboard2Window';
+  } else if (page === 'dashboard3') {
+    templateFile = 'Dashboard3Window';
+  }
 
-  const templateFile = page === 'dashboard3' ? 'Dashboard3Window' : 'Dashboard1Window';
   const template = HtmlService.createTemplateFromFile(templateFile);
 
-  const dashboard1Url = dashboard1GetWebAppUrl_();
+  // 3. Получаем базовый URL (dashboard1)
+  const baseUrl = dashboard1GetWebAppUrl_() || '';
+  // Определяем разделитель для параметров (на случай, если в URL уже есть знак вопроса)
+  const sep = baseUrl.indexOf('?') >= 0 ? '&' : '?';
 
+  // 4. Обязательно передаем ВСЕ ссылки и активную страницу в ЛЮБОЙ выбранный шаблон
   template.activePage = dashboardHtmlResolvePage_(e);
-  template.dashboard1Url = dashboard1Url;
-  template.dashboard2Url = '';
-  template.dashboard3Url = dashboard1Url
-    ? dashboard1Url + (dashboard1Url.indexOf('?') === -1 ? '?page=dashboard3' : '&page=dashboard3')
-    : '';
+  template.dashboard1Url = baseUrl;
+  template.dashboard2Url = baseUrl ? baseUrl + sep + 'page=dashboard2' : '';
+  template.dashboard3Url = baseUrl ? baseUrl + sep + 'page=dashboard3' : '';
 
+  // 5. Генерируем и возвращаем страницу
   return template
     .evaluate()
     .setTitle('Dashboards')

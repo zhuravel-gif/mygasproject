@@ -1,37 +1,16 @@
 COPY (
 WITH
-  -- load info: used for the list of all articles (nmids). It must be
-  -- created externally by build_report2.py before executing this SQL.
-  info_src AS (
-    SELECT * FROM info_src
+  info_filtered AS (
+    SELECT
+      CAST(trim(CAST("Артикул ВБ" AS VARCHAR)) AS VARCHAR) AS nmid,
+      CAST(trim(CAST("Артикул ВБ" AS VARCHAR)) AS VARCHAR) AS artwb,
+      CAST("Наименование" AS VARCHAR) AS nom,
+      CAST("Бренд" AS VARCHAR) AS brandinfo
+    FROM info_src
+    WHERE trim(CAST("Артикул ВБ" AS VARCHAR)) <> ''
+      AND trim(CAST("Артикул ВБ" AS VARCHAR)) <> '0'
   ),
 
-  -- load stocks raw data; this view should be created in build_report2.py
-  stocks_src AS (
-    SELECT * FROM stocks_src
-  ),
-
-  -- load sales raw data
-  sales_src AS (
-    SELECT * FROM sales_src
-  ),
-
-  -- load abc_date raw data
-  abc_src AS (
-    SELECT * FROM abc_src
-  ),
-
-  -- load advertising statistics raw data
-  adv_src AS (
-    SELECT * FROM adv_src
-  ),
-
-  -- load orders for order counts; reuse existing orders_src defined in build_report2.py
-  orders_src AS (
-    SELECT * FROM orders_src
-  ),
-
-  -- Filter orders: only non‑cancelled orders and last 365 days
   orders_filtered AS (
     SELECT
       trim(CAST(nmid AS VARCHAR)) AS nmid,
@@ -43,7 +22,10 @@ WITH
     WHERE COALESCE(TRY_CAST(iscancel AS INTEGER), 1) = 0
       AND trim(CAST(nmid AS VARCHAR)) <> ''
       AND trim(CAST(nmid AS VARCHAR)) <> '0'
-      AND order_date BETWEEN current_date - INTERVAL 364 DAY AND current_date
+      AND COALESCE(
+        TRY_CAST(date AS DATE),
+        CAST(TRY_CAST(date AS TIMESTAMP) AS DATE)
+      ) BETWEEN current_date - INTERVAL 364 DAY AND current_date
   ),
 
   daily_orders AS (
@@ -60,9 +42,12 @@ WITH
         CAST(TRY_CAST(lastchangedate AS TIMESTAMP) AS DATE)
       ) AS stock_date,
       lower(trim(CAST(tip AS VARCHAR))) AS tip,
-      TRY_CAST(quantity AS DOUBLE) AS quantity
+      COALESCE(TRY_CAST(quantity AS DOUBLE), 0) AS quantity
     FROM stocks_src
-    WHERE stock_date BETWEEN current_date - INTERVAL 364 DAY AND current_date
+    WHERE COALESCE(
+        TRY_CAST(lastchangedate AS DATE),
+        CAST(TRY_CAST(lastchangedate AS TIMESTAMP) AS DATE)
+      ) BETWEEN current_date - INTERVAL 364 DAY AND current_date
   ),
 
   daily_stock AS (
@@ -82,11 +67,14 @@ WITH
         TRY_CAST(date AS DATE),
         CAST(TRY_CAST(date AS TIMESTAMP) AS DATE)
       ) AS sale_date,
-      TRY_CAST(forpay AS DOUBLE) AS forpay,
-      TRY_CAST(spp AS DOUBLE) AS spp,
+      COALESCE(TRY_CAST(forpay AS DOUBLE), 0) AS forpay,
+      COALESCE(TRY_CAST(spp AS DOUBLE), 0) AS spp,
       lk
     FROM sales_src
-    WHERE sale_date BETWEEN current_date - INTERVAL 364 DAY AND current_date
+    WHERE COALESCE(
+        TRY_CAST(date AS DATE),
+        CAST(TRY_CAST(date AS TIMESTAMP) AS DATE)
+      ) BETWEEN current_date - INTERVAL 364 DAY AND current_date
   ),
 
   daily_sales AS (
@@ -107,9 +95,12 @@ WITH
         TRY_CAST(date AS DATE),
         CAST(TRY_CAST(date AS TIMESTAMP) AS DATE)
       ) AS marga_date,
-      TRY_CAST(marga AS DOUBLE) AS marga
+      COALESCE(TRY_CAST(marga AS DOUBLE), 0) AS marga
     FROM abc_src
-    WHERE marga_date BETWEEN current_date - INTERVAL 364 DAY AND current_date
+    WHERE COALESCE(
+        TRY_CAST(date AS DATE),
+        CAST(TRY_CAST(date AS TIMESTAMP) AS DATE)
+      ) BETWEEN current_date - INTERVAL 364 DAY AND current_date
   ),
 
   daily_marga AS (
@@ -128,14 +119,18 @@ WITH
         TRY_CAST(operation_date AS DATE),
         CAST(TRY_CAST(operation_date AS TIMESTAMP) AS DATE)
       ) AS adv_date,
-      TRY_CAST(views AS DOUBLE) AS views,
-      TRY_CAST(clicks AS DOUBLE) AS clicks,
-      TRY_CAST(to_cart AS DOUBLE) AS to_cart,
-      TRY_CAST(orders AS DOUBLE) AS adv_orders,
-      TRY_CAST(price AS DOUBLE) AS price,
-      TRY_CAST(cpc AS DOUBLE) AS cpc
+      COALESCE(TRY_CAST(views AS DOUBLE), 0) AS views,
+      COALESCE(TRY_CAST(clicks AS DOUBLE), 0) AS clicks,
+      COALESCE(TRY_CAST(to_cart AS DOUBLE), 0) AS to_cart,
+      COALESCE(TRY_CAST(orders AS DOUBLE), 0) AS adv_orders,
+      COALESCE(TRY_CAST(price AS DOUBLE), 0) AS adv_price,
+      COALESCE(TRY_CAST(cpc AS DOUBLE), 0) AS adv_cpc,
+      COALESCE(TRY_CAST(sum_price AS DOUBLE), 0) AS adv_sum_price
     FROM adv_src
-    WHERE adv_date BETWEEN current_date - INTERVAL 364 DAY AND current_date
+    WHERE COALESCE(
+        TRY_CAST(operation_date AS DATE),
+        CAST(TRY_CAST(operation_date AS TIMESTAMP) AS DATE)
+      ) BETWEEN current_date - INTERVAL 364 DAY AND current_date
   ),
 
   daily_adv AS (
@@ -146,14 +141,16 @@ WITH
       SUM(clicks) AS clicks,
       SUM(to_cart) AS to_cart,
       SUM(adv_orders) AS adv_orders,
-      SUM(price) AS adv_price,
-      SUM(cpc * clicks) AS adv_cost
+      SUM(adv_price) AS adv_price,
+      SUM(adv_cpc) AS adv_cpc,
+      SUM(adv_sum_price) AS adv_sum_price,
+      SUM(adv_price) AS adv_cost
     FROM adv_filtered
     GROUP BY nmid, adv_date
   ),
 
   all_nmids AS (
-    SELECT artwb AS nmid FROM info_src
+    SELECT nmid FROM info_filtered
     UNION SELECT DISTINCT nmid FROM daily_orders
     UNION SELECT DISTINCT nmid FROM daily_stock
     UNION SELECT DISTINCT nmid FROM daily_sales
@@ -168,63 +165,45 @@ WITH
       current_date,
       INTERVAL 1 DAY
     ) AS t(gs)
-  ),
-
-  final AS (
-    SELECT
-      n.nmid,
-      d.day_key AS date,
-      COALESCE(st.stock_fbo, 0) AS stock_fbo,
-      COALESCE(st.stock_fbs, 0) AS stock_fbs,
-      COALESCE(st.stock_fbo, 0) + COALESCE(st.stock_fbs, 0) AS sumstockfbofbs,
-      COALESCE(o.orders_count, 0) AS orders_count,
-      COALESCE(s.sales_count, 0) AS sales_count,
-      COALESCE(s.sales_amount, 0) AS sales_amount,
-      COALESCE(s.spp_sum, 0) AS spp_sum,
-      COALESCE(m.marga, 0) AS marga,
-      COALESCE(a.views, 0) AS views,
-      COALESCE(a.clicks, 0) AS clicks,
-      COALESCE(a.to_cart, 0) AS to_cart,
-      COALESCE(a.adv_orders, 0) AS adv_orders,
-      COALESCE(a.adv_price, 0) AS adv_price,
-      COALESCE(a.adv_cost, 0) AS adv_cost,
-      CASE
-        WHEN COALESCE(s.sales_amount, 0) > 0
-          THEN COALESCE(a.adv_cost, 0) / s.sales_amount
-        ELSE NULL
-      END AS drr
-    FROM all_nmids n
-    CROSS JOIN days d
-    LEFT JOIN daily_stock st
-      ON st.nmid = n.nmid AND st.stock_date = d.day_key
-    LEFT JOIN daily_orders o
-      ON o.nmid = n.nmid AND o.order_date = d.day_key
-    LEFT JOIN daily_sales s
-      ON s.nmid = n.nmid AND s.sale_date = d.day_key
-    LEFT JOIN daily_marga m
-      ON m.nmid = n.nmid AND m.marga_date = d.day_key
-    LEFT JOIN daily_adv a
-      ON a.nmid = n.nmid AND a.adv_date = d.day_key
   )
 
 SELECT
-  date,
-  nmid,
-  stock_fbo,
-  stock_fbs,
-  sumstockfbofbs,
-  orders_count,
-  sales_count,
-  sales_amount,
-  spp_sum,
-  marga,
-  views,
-  clicks,
-  to_cart,
-  adv_orders,
-  adv_price,
-  adv_cost,
-  drr
-FROM final
-ORDER BY nmid, date
+  d.day_key AS date,
+  n.nmid,
+  COALESCE(i.artwb, n.nmid) AS artwb,
+  COALESCE(i.nom, '') AS nom,
+  COALESCE(i.brandinfo, '') AS brandinfo,
+  COALESCE(st.stock_fbo, 0) AS "fboStock",
+  COALESCE(st.stock_fbs, 0) AS "fbsStock",
+  COALESCE(st.stock_fbo, 0) + COALESCE(st.stock_fbs, 0) AS "sumStock",
+  COALESCE(o.orders_count, 0) AS "ordersCount",
+  COALESCE(s.sales_count, 0) AS "salesCount",
+  COALESCE(s.sales_amount, 0) AS "salesSum",
+  COALESCE(s.spp_sum, 0) AS "sppSum",
+  COALESCE(m.marga, 0) AS margin,
+  COALESCE(a.views, 0) AS views,
+  COALESCE(a.clicks, 0) AS clicks,
+  COALESCE(a.to_cart, 0) AS to_cart,
+  COALESCE(a.adv_orders, 0) AS "advOrders",
+  COALESCE(a.adv_price, 0) AS "advPrice",
+  COALESCE(a.adv_cpc, 0) AS "advCpc",
+  CASE
+    WHEN COALESCE(s.sales_amount, 0) > 0 THEN COALESCE(a.adv_cost, 0) / s.sales_amount
+    ELSE NULL
+  END AS drr
+FROM all_nmids n
+CROSS JOIN days d
+LEFT JOIN info_filtered i
+  ON i.nmid = n.nmid
+LEFT JOIN daily_stock st
+  ON st.nmid = n.nmid AND st.stock_date = d.day_key
+LEFT JOIN daily_orders o
+  ON o.nmid = n.nmid AND o.order_date = d.day_key
+LEFT JOIN daily_sales s
+  ON s.nmid = n.nmid AND s.sale_date = d.day_key
+LEFT JOIN daily_marga m
+  ON m.nmid = n.nmid AND m.marga_date = d.day_key
+LEFT JOIN daily_adv a
+  ON a.nmid = n.nmid AND a.adv_date = d.day_key
+ORDER BY n.nmid, d.day_key
 ) TO '__REPORT2_CSV_PATH__' (HEADER, DELIMITER ',');
