@@ -1,16 +1,19 @@
 """
 Script to export advertising statistics from Postgres.
 
-This script retrieves data from the `wb_adv_media_stats` table for the
+This script retrieves data from the `wb_adv` table for the
 last 365 days. The selected columns cover the fields necessary to
 build sales funnels and calculate DRR: the date of the statistic,
 Wildberries article (`nmid`), number of views, number of clicks,
-number of added to cart events (`to_cart`), number of orders,
-advertising spend (`price`), and cost per click (`cpc`).
+number of added to cart events (`atbs` in source, exported as
+`to_cart`), number of orders, advertising spend (`sum` in source,
+exported as `price`), cost per click (`cpc`) and, optionally,
+`sum_price` which may represent another monetary metric. The query
+aliases the columns so that downstream consumers (DuckDB SQL) can
+expect consistent names: `operation_date`, `to_cart`, and `price`.
 
 If `nmid` does not exist in the source, you will need to adjust the
-query to join with another table that maps `advert_id` to `nmid`. At
-present we assume `nmid` is either present or will be joined upstream.
+query to join with another table that maps `advertid` to `nmid`.
 
 Results are written to `data/raw/adv_stats.csv` with UTF‑8 BOM
 encoding. An empty result raises an error.
@@ -25,19 +28,24 @@ import psycopg
 
 # SQL selecting advertising statistics for the last 365 days. We select
 # only the relevant columns for the dashboard. Adjust as needed when
-# more fields are required.
+# more fields are required. The query aliases columns from `wb_adv`
+# to match the expectations of downstream scripts: `date` becomes
+# `operation_date`, `atbs` becomes `to_cart`, and `sum` becomes `price`.
+# `sum_price` is also selected for completeness but may not be used in
+# calculations yet.
 SQL_ADV_STATS = """
 SELECT
-  operation_date,
+  date AS operation_date,
   nmid,
   views,
   clicks,
-  to_cart,
+  atbs AS to_cart,
   orders,
-  price,
-  cpc
-FROM wb_adv_media_stats
-WHERE operation_date >= CURRENT_DATE - INTERVAL '365 days'
+  sum_price,
+  cpc,
+  "sum" AS price
+FROM wb_adv
+WHERE date >= CURRENT_DATE - INTERVAL '365 days'
 """
 
 
@@ -62,7 +70,7 @@ def main() -> None:
 
     if df.empty:
         raise RuntimeError(
-            "Таблица wb_adv_media_stats из Postgres вернулась пустой за 365 дней"
+            "Таблица wb_adv из Postgres вернулась пустой за 365 дней"
         )
 
     df.to_csv(out_path, index=False, encoding="utf-8-sig")
