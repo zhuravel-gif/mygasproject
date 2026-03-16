@@ -1,20 +1,11 @@
 function doGet(e) {
-  const page = dashboardHtmlResolvePage_(e);
-
-  if (page === 'dashboard2' && typeof dashboard2CreateTemplate_ === 'function') {
-    const dashboard2Template = dashboard2CreateTemplate_(e);
-
-    return dashboard2Template
-      .evaluate()
-      .setTitle('Dashboards')
-      .setXFrameOptionsMode(HtmlService.XFrameOptionsMode.ALLOWALL);
-  }
-
-  const template = HtmlService.createTemplateFromFile('Dashboard1Window');
-  template.activePage = 'dashboard1';
-  template.dashboard1Url = dashboard1BuildPageUrl_('dashboard1');
-  template.dashboard2Url = dashboard1BuildPageUrl_('dashboard2');
-
+  // Determine which dashboard page is requested. Default to dashboard1.
+  const page = e && e.parameter && e.parameter.page ? String(e.parameter.page).toLowerCase() : 'dashboard1';
+  // Choose the HTML file to load: Dashboard3 uses its own template; all others use Dashboard1Window.
+  const templateFile = page === 'dashboard3' ? 'Dashboard3Window' : 'Dashboard1Window';
+  const template = HtmlService.createTemplateFromFile(templateFile);
+  // activePage is used only by Dashboard1Window to highlight the tab; safe for other templates.
+  template.activePage = dashboardHtmlResolvePage_(e);
   return template
     .evaluate()
     .setTitle('Dashboards')
@@ -27,12 +18,6 @@ function showDashboard1Html() {
 
 function dashboard1GetWebAppUrl_() {
   return PropertiesService.getScriptProperties().getProperty('DASHBOARD1_WEBAPP_URL') || '';
-}
-
-function dashboard1BuildPageUrl_(page) {
-  const baseUrl = dashboard1GetWebAppUrl_();
-  if (!baseUrl) return '';
-  return baseUrl + (baseUrl.indexOf('?') >= 0 ? '&' : '?') + 'page=' + encodeURIComponent(page);
 }
 
 function dashboardHtmlResolvePage_(e) {
