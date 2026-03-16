@@ -1,0 +1,97 @@
+name: Build Report2
+
+# This workflow builds the extended report (`report2.csv`) and uploads
+# it to a dedicated worksheet in Google Sheets. It runs on a daily
+# schedule and can also be triggered manually via the GitHub Actions
+# interface. Environment variables such as Postgres connection details
+# and Google service account credentials must be provided as repository
+# secrets.
+
+on:
+  schedule:
+    # Run every day at 00:00 UTC. Adjust the cron if you need a
+    # different time; the original pipeline used 05:00 Yekaterinburg.
+    - cron: '0 0 * * *'
+  workflow_dispatch: {}
+
+jobs:
+  build-report2:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.10'
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Export Info from Google Sheets
+        run: python scripts/export_info_from_sheets.py
+        env:
+          GOOGLE_SERVICE_ACCOUNT_JSON: ${{ secrets.GOOGLE_SERVICE_ACCOUNT_JSON }}
+          GOOGLE_SPREADSHEET_ID: ${{ secrets.GOOGLE_SPREADSHEET_ID }}
+
+      - name: Load orders from Postgres
+        run: python scripts/load_orders_from_postgres.py
+        env:
+          POSTGRES_HOST: ${{ secrets.POSTGRES_HOST }}
+          POSTGRES_PORT: ${{ secrets.POSTGRES_PORT }}
+          POSTGRES_DB: ${{ secrets.POSTGRES_DB }}
+          POSTGRES_USER: ${{ secrets.POSTGRES_USER }}
+          POSTGRES_PASSWORD: ${{ secrets.POSTGRES_PASSWORD }}
+          POSTGRES_SSLMODE: ${{ secrets.POSTGRES_SSLMODE }}
+
+      - name: Load stocks from Postgres
+        run: python scripts/load_stocks_from_postgres.py
+        env:
+          POSTGRES_HOST: ${{ secrets.POSTGRES_HOST }}
+          POSTGRES_PORT: ${{ secrets.POSTGRES_PORT }}
+          POSTGRES_DB: ${{ secrets.POSTGRES_DB }}
+          POSTGRES_USER: ${{ secrets.POSTGRES_USER }}
+          POSTGRES_PASSWORD: ${{ secrets.POSTGRES_PASSWORD }}
+          POSTGRES_SSLMODE: ${{ secrets.POSTGRES_SSLMODE }}
+
+      - name: Load sales from Postgres
+        run: python scripts/load_sales_from_postgres.py
+        env:
+          POSTGRES_HOST: ${{ secrets.POSTGRES_HOST }}
+          POSTGRES_PORT: ${{ secrets.POSTGRES_PORT }}
+          POSTGRES_DB: ${{ secrets.POSTGRES_DB }}
+          POSTGRES_USER: ${{ secrets.POSTGRES_USER }}
+          POSTGRES_PASSWORD: ${{ secrets.POSTGRES_PASSWORD }}
+          POSTGRES_SSLMODE: ${{ secrets.POSTGRES_SSLMODE }}
+
+      - name: Load abc_date from Postgres
+        run: python scripts/load_abc_date_from_postgres.py
+        env:
+          POSTGRES_HOST: ${{ secrets.POSTGRES_HOST }}
+          POSTGRES_PORT: ${{ secrets.POSTGRES_PORT }}
+          POSTGRES_DB: ${{ secrets.POSTGRES_DB }}
+          POSTGRES_USER: ${{ secrets.POSTGRES_USER }}
+          POSTGRES_PASSWORD: ${{ secrets.POSTGRES_PASSWORD }}
+          POSTGRES_SSLMODE: ${{ secrets.POSTGRES_SSLMODE }}
+
+      - name: Load advertising statistics from Postgres
+        run: python scripts/load_adv_stats_from_postgres.py
+        env:
+          POSTGRES_HOST: ${{ secrets.POSTGRES_HOST }}
+          POSTGRES_PORT: ${{ secrets.POSTGRES_PORT }}
+          POSTGRES_DB: ${{ secrets.POSTGRES_DB }}
+          POSTGRES_USER: ${{ secrets.POSTGRES_USER }}
+          POSTGRES_PASSWORD: ${{ secrets.POSTGRES_PASSWORD }}
+          POSTGRES_SSLMODE: ${{ secrets.POSTGRES_SSLMODE }}
+
+      - name: Build report2 using DuckDB
+        run: python scripts/build_report2.py
+
+      - name: Upload report2 to Google Sheets
+        run: python scripts/push_report2_to_sheets.py
+        env:
+          GOOGLE_SERVICE_ACCOUNT_JSON: ${{ secrets.GOOGLE_SERVICE_ACCOUNT_JSON }}
+          GOOGLE_SPREADSHEET_ID: ${{ secrets.GOOGLE_SPREADSHEET_ID }}
