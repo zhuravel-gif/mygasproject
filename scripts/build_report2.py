@@ -2,7 +2,7 @@
 Build report2.csv using DuckDB.
 
 This script orchestrates the transformation of raw CSV exports into an
-aggregated dataset for Dashboard 3. It reads the raw data files (info,
+aggregated dataset for Dashboard 3. It reads the raw data files (info,
 orders, stocks, sales, abc_date, adv_stats) into DuckDB, runs the
 `report2.sql` script to compute daily metrics over the last 365 days,
 and writes the result to `data/out/report2.csv`.
@@ -18,6 +18,11 @@ import csv
 import duckdb
 
 
+def _norm(path: Path) -> str:
+    """Return a DuckDB-safe forward-slash path string."""
+    return str(path).replace("\\", "/")
+
+
 def main() -> None:
     repo_root = Path(__file__).resolve().parent.parent
     raw_dir = repo_root / "data" / "raw"
@@ -26,7 +31,6 @@ def main() -> None:
 
     out_dir.mkdir(parents=True, exist_ok=True)
 
-    # Paths to raw CSVs
     info_csv = raw_dir / "info.csv"
     orders_csv = raw_dir / "orders.csv"
     stocks_csv = raw_dir / "stocks.csv"
@@ -36,23 +40,23 @@ def main() -> None:
     report_csv = out_dir / "report2.csv"
     sql_path = sql_dir / "report2.sql"
 
-    # Validate presence of all required inputs.
-    for path in [info_csv, orders_csv, stocks_csv, sales_csv, abc_csv, adv_csv]:
+    for path in [info_csv, orders_csv, stocks_csv, sales_csv, abc_csv, adv_csv, sql_path]:
         if not path.exists():
             raise FileNotFoundError(f"Не найден файл: {path}")
 
     sql_template = sql_path.read_text(encoding="utf-8")
-    sql = sql_template.replace("__REPORT2_CSV_PATH__", str(report_csv).replace("\\", "/"))
+    sql = sql_template.replace("__REPORT2_CSV_PATH__", _norm(report_csv))
 
     con = duckdb.connect()
 
     def register_view(name: str, path: Path) -> None:
+        csv_path = _norm(path)
         con.execute(
             f"""
             CREATE OR REPLACE VIEW {name} AS
             SELECT *
             FROM read_csv_auto(
-              '{str(path).replace("\\", "/")}',
+              '{csv_path}',
               header = true,
               all_varchar = true,
               ignore_errors = true
@@ -60,8 +64,6 @@ def main() -> None:
             """
         )
 
-    # Create views for each CSV. The names must match those in
-    # report2.sql.
     register_view("info_src", info_csv)
     register_view("orders_src", orders_csv)
     register_view("stocks_src", stocks_csv)
@@ -69,12 +71,10 @@ def main() -> None:
     register_view("abc_src", abc_csv)
     register_view("adv_src", adv_csv)
 
-    # Execute the report SQL.
     con.execute(sql)
 
     print(f"Built report2: {report_csv}")
 
-    # Print a brief summary of the output header for debugging.
     with report_csv.open("r", newline="", encoding="utf-8-sig") as f:
         reader = csv.reader(f)
         header = next(reader, [])
