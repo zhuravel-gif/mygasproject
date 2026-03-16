@@ -1,4 +1,10 @@
-// 2. Выбираем правильный HTML-файл в зависимости от параметра page
+function doGet(e) {
+  // 1. Определяем, какую страницу запросил пользователь
+  const page = e && e.parameter && e.parameter.page 
+    ? String(e.parameter.page).toLowerCase() 
+    : 'dashboard1';
+
+  // 2. Выбираем правильный HTML-файл в зависимости от параметра page
   let templateFile = 'Dashboard1Window'; // по умолчанию
   if (page === 'dashboard2') {
     templateFile = 'Dashboard2Window';
