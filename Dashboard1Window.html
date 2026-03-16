@@ -20,12 +20,6 @@
         --danger: #c62828;
         --danger-mid: #e57373;
         --shadow: 0 8px 24px rgba(15, 23, 42, 0.08);
-
-        --sticky-1: 90px;
-        --sticky-2: 220px;
-        --sticky-3: 90px;
-        --sticky-4: 90px;
-        --sticky-5: 120px;
       }
 
       * { box-sizing: border-box; }
@@ -49,15 +43,15 @@
         height: 100vh;
         display: flex;
         flex-direction: column;
-        padding: 10px;
-        gap: 10px;
+        padding: 16px;
+        gap: 16px;
       }
 
       .topbar {
         background: linear-gradient(135deg, var(--blue) 0%, var(--blue-2) 100%);
         color: #fff;
-        border-radius: 12px;
-        padding: 10px 14px 8px;
+        border-radius: 16px;
+        padding: 18px 20px 16px;
         box-shadow: var(--shadow);
         flex: 0 0 auto;
       }
@@ -65,110 +59,55 @@
       .topbar-head {
         display: flex;
         justify-content: space-between;
-        align-items: center;
-        gap: 10px;
-        margin-bottom: 6px;
-      }
-
-      .topbar-title {
-        min-width: 0;
+        align-items: flex-start;
+        gap: 16px;
+        margin-bottom: 10px;
       }
 
       .topbar h1 {
-        margin: 0 0 2px;
-        font-size: 18px;
-        line-height: 1.1;
+        margin: 0 0 6px;
+        font-size: 24px;
+        line-height: 1.2;
       }
 
       .topbar p {
         margin: 0;
         opacity: 0.92;
-        font-size: 11px;
-        line-height: 1.25;
+        font-size: 13px;
       }
 
       .topbar-actions {
         display: flex;
-        align-items: center;
         gap: 10px;
-        flex-wrap: nowrap;
-      }
-
-      .status-wrap {
-        display: flex;
-        align-items: center;
-        gap: 8px;
-        min-width: 220px;
-      }
-
-      .status-bar {
-        width: 120px;
-        height: 6px;
-        background: rgba(255,255,255,0.25);
-        border-radius: 999px;
-        overflow: hidden;
-      }
-
-      .status-fill {
-        width: 0;
-        height: 100%;
-        background: #fff;
-        transition: width 0.25s ease;
-      }
-
-      .status-text {
-        font-size: 11px;
-        white-space: nowrap;
-      }
-
-      .nav-tabs {
-        display: flex;
-        gap: 8px;
         flex-wrap: wrap;
-        margin-bottom: 6px;
-      }
-
-      .nav-tab {
-        color: #fff;
-        text-decoration: none;
-        padding: 5px 10px;
-        border-radius: 999px;
-        border: 1px solid rgba(255,255,255,0.35);
-        font-size: 12px;
-        line-height: 1;
-        opacity: 0.92;
-      }
-
-      .nav-tab.active {
-        background: rgba(255,255,255,0.16);
-        border-color: rgba(255,255,255,0.55);
-        opacity: 1;
       }
 
       .topbar-controls {
         display: flex;
         align-items: center;
-        justify-content: space-between;
-        gap: 10px;
+        gap: 12px;
         flex-wrap: wrap;
+        margin-top: 10px;
       }
 
       .mode-switch {
         display: inline-flex;
-        background: rgba(255,255,255,0.14);
+        background: rgba(255, 255, 255, 0.18);
+        border: 1px solid rgba(255, 255, 255, 0.22);
         border-radius: 999px;
-        padding: 2px;
+        padding: 4px;
+        gap: 4px;
       }
 
       .mode-btn {
         border: 0;
         background: transparent;
         color: #fff;
-        padding: 6px 12px;
+        padding: 8px 14px;
         border-radius: 999px;
         cursor: pointer;
         font-weight: 700;
-        font-size: 12px;
+        font-size: 13px;
       }
 
       .mode-btn.active {
@@ -177,7 +116,36 @@
       }
 
       .mode-hint {
-        font-size: 11px;
+        font-size: 12px;
+        opacity: 0.92;
+      }
+
+      .status-wrap {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+      }
+
+      .status-bar {
+        position: relative;
+        width: 100%;
+        height: 8px;
+        border-radius: 999px;
+        background: rgba(255, 255, 255, 0.22);
+        overflow: hidden;
+      }
+
+      .status-fill {
+        height: 100%;
+        width: 0%;
+        border-radius: 999px;
+        background: linear-gradient(90deg, #ffffff 0%, #d7ebff 100%);
+        transition: width 0.22s ease;
+      }
+
+      .status-text {
+        white-space: nowrap;
+        font-size: 12px;
         opacity: 0.95;
       }
 
@@ -190,59 +158,70 @@
 
       .page {
         min-height: 0;
-        flex: 1 1 auto;
+        height: 100%;
         display: none;
       }
 
       .page.active {
         display: flex;
         flex-direction: column;
+        gap: 16px;
+      }
+
+      .nav-tabs {
+        display: flex;
         gap: 10px;
+        flex-wrap: wrap;
+      }
+
+      .nav-tab {
+        background: var(--card);
+        color: var(--blue);
+        text-decoration: none;
+        border: 1px solid var(--line);
+        border-radius: 999px;
+        padding: 10px 14px;
+        font-size: 13px;
+        font-weight: 700;
+        box-shadow: var(--shadow);
+      }
+
+      .nav-tab.active {
+        background: var(--blue);
+        color: #fff;
+        border-color: var(--blue);
       }
 
       .kpi-grid {
         display: grid;
-        grid-template-columns: 1.1fr 1.1fr 1fr 1fr;
-        gap: 10px;
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+        gap: 12px;
       }
 
       .kpi {
         background: var(--card);
         border: 1px solid var(--line);
-        border-radius: 12px;
+        border-radius: 16px;
+        padding: 16px;
         box-shadow: var(--shadow);
-        padding: 10px 12px;
-        min-height: 82px;
-      }
-
-      .kpi.compact {
-        min-height: 72px;
-        padding: 8px 10px;
       }
 
       .kpi .label {
         color: var(--muted);
-        font-size: 11px;
-        font-weight: 700;
-        margin-bottom: 4px;
-        line-height: 1.2;
+        font-size: 12px;
+        margin-bottom: 8px;
       }
 
       .kpi .value {
-        font-size: 24px;
+        font-size: 28px;
         font-weight: 700;
-        line-height: 1.05;
+        line-height: 1.1;
         margin-bottom: 4px;
-      }
-
-      .kpi.compact .value {
-        font-size: 18px;
       }
 
       .kpi .subvalue {
         color: var(--muted);
-        font-size: 11px;
-        line-height: 1.25;
+        font-size: 12px;
       }
 
       .filters-card,
@@ -250,52 +229,41 @@
       .placeholder-card {
         background: var(--card);
         border: 1px solid var(--line);
-        border-radius: 12px;
+        border-radius: 16px;
         box-shadow: var(--shadow);
       }
 
       .filters-card {
-        padding: 10px 12px;
+        padding: 14px 16px;
       }
 
       .filters-grid {
         display: grid;
-        grid-template-columns:
-          minmax(120px, 1fr)
-          minmax(120px, 1fr)
-          minmax(120px, 1fr)
-          minmax(120px, 1fr)
-          minmax(120px, 1fr)
-          minmax(95px, 110px)
-          minmax(220px, 1.6fr);
-        gap: 10px;
-        align-items: end;
+        grid-template-columns: repeat(6, minmax(0, 1fr));
+        gap: 12px;
       }
 
       .field {
         display: flex;
         flex-direction: column;
-        gap: 4px;
-        min-width: 0;
+        gap: 6px;
       }
 
       .field label {
-        font-size: 11px;
+        font-size: 12px;
         color: var(--muted);
         font-weight: 700;
-        line-height: 1.1;
       }
 
       select,
       input[type="text"] {
         width: 100%;
         border: 1px solid var(--line);
-        border-radius: 8px;
-        padding: 8px 10px;
-        font-size: 12px;
+        border-radius: 10px;
+        padding: 10px 12px;
+        font-size: 13px;
         outline: none;
         background: #fff;
-        height: 34px;
       }
 
       .table-card {
@@ -309,40 +277,37 @@
         min-height: 0;
         flex: 1 1 auto;
         overflow: auto;
-        border-radius: 12px 12px 0 0;
+        border-radius: 16px 16px 0 0;
       }
 
       table {
-        width: 100%;
+        width: max-content;
         min-width: 100%;
         border-collapse: separate;
         border-spacing: 0;
-        font-size: 11px;
-        table-layout: fixed;
+        font-size: 12px;
       }
 
       thead th {
         position: sticky;
         top: 0;
-        z-index: 20;
+        z-index: 3;
+        background: #eef4fb;
         color: #16324f;
         font-weight: 700;
         text-align: center;
         border-bottom: 1px solid var(--line);
         border-right: 1px solid var(--line);
-        padding: 8px 6px;
+        padding: 10px 8px;
         white-space: normal;
-        line-height: 1.15;
-        box-shadow: inset 0 -1px 0 var(--line);
+        line-height: 1.2;
       }
 
       tbody td {
         border-bottom: 1px solid #edf2f7;
         border-right: 1px solid #edf2f7;
-        padding: 7px 6px;
+        padding: 8px;
         white-space: nowrap;
-        overflow: hidden;
-        text-overflow: ellipsis;
         background: #fff;
       }
 
@@ -354,8 +319,6 @@
         background: #f4f8fc !important;
         font-weight: 700;
         color: #24415e;
-        overflow: visible;
-        text-overflow: clip;
       }
 
       .group-toggle {
@@ -363,10 +326,10 @@
         user-select: none;
       }
 
-      .indent-1 { padding-left: 10px !important; }
-      .indent-2 { padding-left: 20px !important; }
-      .indent-3 { padding-left: 30px !important; }
-      .indent-4 { padding-left: 40px !important; }
+      .indent-1 { padding-left: 12px !important; }
+      .indent-2 { padding-left: 24px !important; }
+      .indent-3 { padding-left: 36px !important; }
+      .indent-4 { padding-left: 48px !important; }
 
       .sticky-1,
       .sticky-2,
@@ -375,66 +338,16 @@
       .sticky-5,
       .sticky-last {
         position: sticky;
-        z-index: 8;
+        z-index: 2;
         background: inherit;
-        background-clip: padding-box;
       }
 
-      .sticky-1::after,
-      .sticky-2::after,
-      .sticky-3::after,
-      .sticky-4::after,
-      .sticky-5::after {
-        content: "";
-        position: absolute;
-        top: 0;
-        right: -1px;
-        width: 1px;
-        height: 100%;
-        background: var(--line);
-      }
-
-      .sticky-1 {
-        left: 0;
-        width: var(--sticky-1);
-        min-width: var(--sticky-1);
-        max-width: var(--sticky-1);
-      }
-
-      .sticky-2 {
-        left: var(--sticky-1);
-        width: var(--sticky-2);
-        min-width: var(--sticky-2);
-        max-width: var(--sticky-2);
-      }
-
-      .sticky-3 {
-        left: calc(var(--sticky-1) + var(--sticky-2));
-        width: var(--sticky-3);
-        min-width: var(--sticky-3);
-        max-width: var(--sticky-3);
-      }
-
-      .sticky-4 {
-        left: calc(var(--sticky-1) + var(--sticky-2) + var(--sticky-3));
-        width: var(--sticky-4);
-        min-width: var(--sticky-4);
-        max-width: var(--sticky-4);
-      }
-
-      .sticky-5 {
-        left: calc(var(--sticky-1) + var(--sticky-2) + var(--sticky-3) + var(--sticky-4));
-        width: var(--sticky-5);
-        min-width: var(--sticky-5);
-        max-width: var(--sticky-5);
-      }
-
-      .sticky-last {
-        right: 0;
-        z-index: 9;
-        background: #fff;
-        box-shadow: -8px 0 10px rgba(15, 23, 42, 0.06);
-      }
+      .sticky-1 { left: 0; min-width: 110px; max-width: 110px; }
+      .sticky-2 { left: 110px; min-width: 250px; max-width: 250px; }
+      .sticky-3 { left: 360px; min-width: 110px; max-width: 110px; }
+      .sticky-4 { left: 470px; min-width: 110px; max-width: 110px; }
+      .sticky-5 { left: 580px; min-width: 120px; max-width: 120px; }
+      .sticky-last { right: 0; background: #fff; box-shadow: -6px 0 10px rgba(15, 23, 42, 0.05); }
 
       thead .sticky-1,
       thead .sticky-2,
@@ -442,30 +355,21 @@
       thead .sticky-4,
       thead .sticky-5,
       thead .sticky-last {
-        z-index: 21;
+        background: #eef4fb;
       }
 
-      .w-60 { width: 60px; min-width: 60px; max-width: 60px; }
-      .w-65 { width: 65px; min-width: 65px; max-width: 65px; }
-      .w-70 { width: 70px; min-width: 70px; max-width: 70px; }
-      .w-75 { width: 75px; min-width: 75px; max-width: 75px; }
-      .w-80 { width: 80px; min-width: 80px; max-width: 80px; }
-      .w-85 { width: 85px; min-width: 85px; max-width: 85px; }
-      .w-90 { width: 90px; min-width: 90px; max-width: 90px; }
-      .w-100 { width: 100px; min-width: 100px; max-width: 100px; }
+      .w-80 { min-width: 80px; max-width: 80px; }
+      .w-90 { min-width: 90px; max-width: 90px; }
+      .w-100 { min-width: 100px; max-width: 100px; }
+      .w-120 { min-width: 120px; max-width: 120px; }
       .num { text-align: right; }
       .muted { color: var(--muted); }
-
-      .head-core { background: #dcecfb; }
-      .head-supply { background: #f8d7da; }
-      .head-stock { background: #d9ead3; }
-      .head-default { background: #eef4fb; }
 
       .spark {
         display: flex;
         align-items: flex-end;
-        gap: 1px;
-        height: 22px;
+        gap: 2px;
+        height: 28px;
       }
 
       .spark span {
@@ -477,10 +381,10 @@
 
       .badge {
         display: inline-block;
-        min-width: 48px;
+        min-width: 52px;
         text-align: center;
         border-radius: 999px;
-        padding: 3px 7px;
+        padding: 4px 8px;
         font-weight: 700;
       }
 
@@ -505,14 +409,14 @@
 
       .loading,
       .empty {
-        padding: 26px 20px;
+        padding: 30px 20px;
         text-align: center;
         color: var(--muted);
       }
 
       .footer-actions {
         border-top: 1px solid var(--line);
-        padding: 10px 12px;
+        padding: 12px 16px;
         display: flex;
         justify-content: flex-end;
       }
@@ -521,11 +425,10 @@
         border: 1px solid var(--line);
         background: #fff;
         color: var(--text);
-        border-radius: 8px;
-        padding: 8px 12px;
+        border-radius: 10px;
+        padding: 10px 14px;
         cursor: pointer;
         font-weight: 700;
-        font-size: 12px;
       }
 
       .placeholder-card {
@@ -535,28 +438,15 @@
         padding: 24px;
       }
 
-      @media (max-width: 1380px) {
+      @media (max-width: 1200px) {
         .kpi-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-        .filters-grid {
-          grid-template-columns: repeat(4, minmax(0, 1fr));
-        }
-      }
-
-      @media (max-width: 920px) {
-        .filters-grid,
-        .kpi-grid {
-          grid-template-columns: 1fr 1fr;
-        }
+        .filters-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
       }
 
       @media (max-width: 760px) {
-        .app { padding: 8px; }
-        .filters-grid,
-        .kpi-grid { grid-template-columns: 1fr; }
-        .topbar-controls {
-          flex-direction: column;
-          align-items: flex-start;
-        }
+        .app { padding: 10px; }
+        .kpi-grid,
+        .filters-grid { grid-template-columns: 1fr; }
       }
     </style>
   </head>
@@ -564,7 +454,7 @@
     <div class="app">
       <div class="topbar">
         <div class="topbar-head">
-          <div class="topbar-title">
+          <div>
             <h1>Дашборды</h1>
             <p id="metaText">Подготовка данных…</p>
           </div>
@@ -579,13 +469,12 @@
           </div>
         </div>
 
+        <div class="nav-tabs" id="navTabs"></div>
+
         <div class="topbar-controls">
-          <div style="display:flex; align-items:center; gap:10px; flex-wrap:wrap;">
-            <div class="nav-tabs" id="navTabs"></div>
-            <div class="mode-switch">
-              <button id="mode14Btn" class="mode-btn active" type="button" onclick="setPeriodMode('14')">14 дней</button>
-              <button id="mode30Btn" class="mode-btn" type="button" onclick="setPeriodMode('30')">30 дней</button>
-            </div>
+          <div class="mode-switch">
+            <button id="mode14Btn" class="mode-btn active" type="button" onclick="setPeriodMode('14')">14 дней</button>
+            <button id="mode30Btn" class="mode-btn" type="button" onclick="setPeriodMode('30')">30 дней</button>
           </div>
           <div id="modeHint" class="mode-hint">Сейчас показаны метрики и тренд за 14 дней.</div>
         </div>
@@ -624,7 +513,7 @@
                   <option value="Да">Да</option>
                 </select>
               </div>
-              <div class="field">
+              <div class="field" style="grid-column: 1 / -1;">
                 <label>Поиск</label>
                 <input id="searchText" type="text" placeholder="Наименование, артикул, бренд…" />
               </div>
@@ -679,69 +568,58 @@
 
       let currentMode = '14';
 
-      function getHeaderGroupClass(key) {
-        const core = ['hierarchy', 'nom', 'art1C', 'artwb', 'cat'];
-        const supply = ['order', 'inwork', 'rawstock'];
-        const stock = ['stock', 'reserved', 'shipped', 'fbostock'];
-
-        if (core.includes(key)) return 'head-core';
-        if (supply.includes(key)) return 'head-supply';
-        if (stock.includes(key)) return 'head-stock';
-        return 'head-default';
-      }
-
       function getColumnsForMode() {
         const is30 = currentMode === '30';
 
         return [
-          { key: 'hierarchy', label: 'Иерархия', className: 'sticky-1', help: 'Уровень группировки: Бренд → Группа 1 → Группа 2 → Группа 3 → SKU. Источник: report → Бренд, Товарная группа 1/2/3.' },
+          { key: 'hierarchy', label: 'Иерархия', className: 'sticky-1', help: 'Уровень группировки: Бренд → Группа 1 → Группа 2 → Группа 3 → SKU. Источник: поля report Бренд, Товарная группа 1/2/3.' },
           { key: 'nom', label: 'Наименование', className: 'sticky-2', help: 'Источник: report → Наименование.' },
           { key: 'art1C', label: 'Артикул', className: 'sticky-3', help: 'Источник: report → Артикул.' },
           { key: 'artwb', label: 'Артикул WB', className: 'sticky-4', help: 'Источник: report → Артикул ВБ.' },
           { key: 'cat', label: 'Категория', className: 'sticky-5', help: 'Источник: report → Категория товаров.' },
-          { key: 'order', label: 'Заказано\nпоставщику', className: 'num w-75', help: 'Источник: report → Заказано поставщику.' },
-          { key: 'inwork', label: 'В\nпроизводстве', className: 'num w-75', help: 'Источник: report → В производстве.' },
-          { key: 'rawstock', label: 'Остаток\nсырья', className: 'num w-70', help: 'Источник: report → Остаток сырья в шт.' },
-          { key: 'stock', label: 'Готовая\nпродукция', className: 'num w-75', help: 'Источник: report → Готовая продукция на складе.' },
-          { key: 'reserved', label: 'В\nрезерве', className: 'num w-65', help: 'Источник: report → В резерве.' },
-          { key: 'shipped', label: 'Отгружено\nна РВБ', className: 'num w-75', help: 'Источник: report → Отгружено на РВБ.' },
-          { key: 'fbostock', label: 'ФБО\nостаток', className: 'num w-70', help: 'Источник: report → ФБО остаток.' },
+          { key: 'order', label: 'Заказано\nпоставщику', className: 'num w-100', help: 'Источник: report → Заказано поставщику.' },
+          { key: 'inwork', label: 'В\nпроизводстве', className: 'num w-100', help: 'Источник: report → В производстве.' },
+          { key: 'rawstock', label: 'Остаток\nсырья', className: 'num w-90', help: 'Источник: report → Остаток сырья в шт.' },
+          { key: 'stock', label: 'Готовая\nпродукция', className: 'num w-90', help: 'Источник: report → Готовая продукция на складе.' },
+          { key: 'reserved', label: 'В\nрезерве', className: 'num w-90', help: 'Источник: report → В резерве.' },
+          { key: 'shipped', label: 'Отгружено\nна РВБ', className: 'num w-100', help: 'Источник: report → Отгружено на РВБ.' },
+          { key: 'fbostock', label: 'ФБО\nостаток', className: 'num w-90', help: 'Источник: report → ФБО остаток.' },
           {
             key: 'ordersFBO',
             label: is30 ? 'Заказы\nFBO 30д' : 'Заказы\nFBO 14д',
-            className: 'num w-70',
+            className: 'num w-80',
             help: is30 ? 'Источник: report → ordersFBO30.' : 'Источник: report → ordersFBO.'
           },
           {
             key: 'ordersFBS',
             label: is30 ? 'Заказы\nFBS 30д' : 'Заказы\nFBS 14д',
-            className: 'num w-70',
+            className: 'num w-80',
             help: is30 ? 'Источник: report → ordersFBS30.' : 'Источник: report → ordersFBS.'
           },
           {
             key: 'orderssum',
             label: is30 ? 'Заказы\nвсего 30д' : 'Заказы\nвсего 14д',
-            className: 'num w-70',
+            className: 'num w-80',
             help: is30 ? 'Источник: report → orderssum30.' : 'Источник: report → orderssum.'
           },
           {
             key: 'trend',
             label: is30 ? 'Тренд 30д' : 'Тренд 14д',
-            className: 'w-80',
+            className: 'w-120',
             help: is30 ? 'Источник: report → trend30d. Ряд заказов за последние 30 дней.' : 'Источник: report → trend14d. Ряд заказов за последние 14 дней.'
           },
-          { key: 'sumstock', label: 'Суммарный\nостаток', className: 'num w-75', help: 'Источник: report → sumstock = stock + reserved + shipped + fbostock.' },
+          { key: 'sumstock', label: 'Суммарный\nостаток', className: 'num w-90', help: 'Источник: report → sumstock = stock + reserved + shipped + fbostock.' },
           {
             key: 'dayorders',
             label: is30 ? 'Средние\nзаказы/день 30д' : 'Средние\nзаказы/день 14д',
-            className: 'num w-85',
+            className: 'num w-100',
             help: is30 ? 'Источник: report → dayorders30.' : 'Источник: report → dayorders.'
           },
           {
             key: 'zapas',
             label: is30 ? 'Запас,\nдней 30д' : 'Запас,\nдней 14д',
-            className: 'num w-85 sticky-last',
-            help: is30 ? 'Источник: report → zapas30. Показывает, на сколько дней хватит текущего остатка при текущем темпе продаж.' : 'Источник: report → zapas. Показывает, на сколько дней хватит текущего остатка при текущем темпе продаж.'
+            className: 'num w-100 sticky-last',
+            help: is30 ? 'Источник: report → zapas30.' : 'Источник: report → zapas.'
           }
         ];
       }
@@ -765,20 +643,14 @@
         }
       });
 
-  const DASHBOARD_URLS = {
-  dashboard1: '<?= dashboard1Url ?>',
-  dashboard2: '<?= dashboard2Url ?>',
-  dashboard3: ''
-};
+      function renderNavTabs() {
+        const root = document.getElementById('navTabs');
+        root.innerHTML = PAGES.map(page => {
+          const activeClass = page.id === ACTIVE_PAGE ? ' active' : '';
+          return `<a class="nav-tab${activeClass}" href="?page=${encodeURIComponent(page.id)}">${escapeHtml(page.title)}</a>`;
+        }).join('');
+      }
 
-	function renderNavTabs() {
-  	const root = document.getElementById('navTabs');
-  	root.innerHTML = PAGES.map(page => {
-   	 const activeClass = page.id === ACTIVE_PAGE ? ' active' : '';
-   	 const href = DASHBOARD_URLS[page.id] || '#';
-    	return `<a class="nav-tab${activeClass}" href="${escapeHtml(href)}">${escapeHtml(page.title)}</a>`;
-  	}).join('');
-}
       function initPages() {
         PAGES.forEach(page => {
           const pageEl = document.getElementById(`page-${page.id}`);
@@ -791,8 +663,8 @@
         const columns = getColumnsForMode();
         const row = document.getElementById('tableHeadRow');
         row.innerHTML = columns.map(col => {
-          const className = [col.className || '', getHeaderGroupClass(col.key)].join(' ').trim();
-          return `<th class="${className}" title="${escapeHtml(col.help)}">${col.label.replaceAll('\n', '<br>')}</th>`;
+          const className = col.className ? ` class="${col.className}"` : '';
+          return `<th${className} title="${escapeHtml(col.help)}">${col.label.replaceAll('\n', '<br>')}</th>`;
         }).join('');
       }
 
@@ -882,24 +754,24 @@
       }
 
       function renderKpis(summary) {
-        const suffix = currentMode === '30' ? '30 дней' : '14 дней';
+        const suffix = currentMode === '30' ? '30д' : '14д';
 
         const root = document.getElementById('kpis');
         root.innerHTML = `
-          <div class="kpi compact">
+          <div class="kpi">
             <div class="label">Turnover, дней</div>
             <div class="value">${fmtFloat(summary.turnover)}</div>
-            <div class="subvalue">На сколько дней хватит текущего остатка при текущем темпе продаж по выбранным фильтрам.</div>
+            <div class="subvalue">sumstock / dayorders${currentMode === '30' ? '30' : ''} по отфильтрованным строкам</div>
           </div>
-          <div class="kpi compact">
+          <div class="kpi">
             <div class="label">Суммарный остаток</div>
             <div class="value">${fmtInt(summary.sumstock)}</div>
-            <div class="subvalue">Сумма поля sumstock по отфильтрованным строкам.</div>
+            <div class="subvalue">Источник: report → sumstock</div>
           </div>
           <div class="kpi">
             <div class="label">Уходимость, шт/день</div>
             <div class="value">${fmtFloat(summary.totalDayorders)}</div>
-            <div class="subvalue">Сумма средних продаж в день за ${suffix} по текущей выборке.</div>
+            <div class="subvalue">Сумма dayorders за ${suffix} по фильтрам</div>
           </div>
           <div class="kpi">
             <div class="label">SKU в выборке</div>
@@ -941,6 +813,7 @@
         setProgress('Подготовка строк…', 65);
 
         const rows = applyFilters(rawData.rows);
+        const summary = currentMode === '30' ? rawData.summary30 : rawData.summary14;
         const filteredSummary = summarizeRows(rows);
         const tree = buildTree(rows);
 
@@ -1085,24 +958,24 @@
         return `
           <tr${rowClass}>
             <td class="sticky-1 muted">SKU</td>
-            <td class="sticky-2" title="${escapeHtml(r.nom || '')}">${escapeHtml(r.nom || '')}</td>
+            <td class="sticky-2">${escapeHtml(r.nom || '')}</td>
             <td class="sticky-3">${escapeHtml(r.art1C || '')}</td>
             <td class="sticky-4">${escapeHtml(r.artwb || '')}</td>
-            <td class="sticky-5" title="${escapeHtml(r.cat || '')}">${escapeHtml(r.cat || '')}</td>
-            <td class="num w-75">${fmtInt(r.order)}</td>
-            <td class="num w-75">${fmtInt(r.inwork)}</td>
-            <td class="num w-70">${fmtInt(r.rawstock)}</td>
-            <td class="num w-75">${fmtInt(r.stock)}</td>
-            <td class="num w-65">${fmtInt(r.reserved)}</td>
-            <td class="num w-75">${fmtInt(r.shipped)}</td>
-            <td class="num w-70">${fmtInt(r.fbostock)}</td>
-            <td class="num w-70">${fmtInt(ordersFBO)}</td>
-            <td class="num w-70">${fmtInt(ordersFBS)}</td>
-            <td class="num w-70">${fmtInt(orderssum)}</td>
-            <td class="w-80">${renderSpark(trend)}</td>
-            <td class="num w-75">${fmtInt(r.sumstock)}</td>
-            <td class="num w-85">${fmtFloat(dayorders)}</td>
-            <td class="num w-85 sticky-last">${renderZapas(zapas)}</td>
+            <td class="sticky-5">${escapeHtml(r.cat || '')}</td>
+            <td class="num w-100">${fmtInt(r.order)}</td>
+            <td class="num w-100">${fmtInt(r.inwork)}</td>
+            <td class="num w-90">${fmtInt(r.rawstock)}</td>
+            <td class="num w-90">${fmtInt(r.stock)}</td>
+            <td class="num w-90">${fmtInt(r.reserved)}</td>
+            <td class="num w-100">${fmtInt(r.shipped)}</td>
+            <td class="num w-90">${fmtInt(r.fbostock)}</td>
+            <td class="num w-80">${fmtInt(ordersFBO)}</td>
+            <td class="num w-80">${fmtInt(ordersFBS)}</td>
+            <td class="num w-80">${fmtInt(orderssum)}</td>
+            <td class="w-120">${renderSpark(trend)}</td>
+            <td class="num w-90">${fmtInt(r.sumstock)}</td>
+            <td class="num w-100">${fmtFloat(dayorders)}</td>
+            <td class="num w-100 sticky-last">${renderZapas(zapas)}</td>
           </tr>
         `;
       }
@@ -1111,7 +984,7 @@
         const arr = Array.isArray(series) ? series : [];
         const max = Math.max(...arr, 1);
         const bars = arr.map(v => {
-          const h = Math.max(3, Math.round((v / max) * 20));
+          const h = Math.max(3, Math.round((v / max) * 26));
           return `<span style="height:${h}px"></span>`;
         }).join('');
         return `<div class="spark">${bars}</div>`;

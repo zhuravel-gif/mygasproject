@@ -1,17 +1,20 @@
 function doGet(e) {
-  // Determine which dashboard page is requested. Default to dashboard1.
-  const page = e && e.parameter && e.parameter.page ? String(e.parameter.page).toLowerCase() : 'dashboard1';
-  // Choose the HTML file to load: Dashboard3 uses its own template; all others use Dashboard1Window.
+  const page = e && e.parameter && e.parameter.page
+    ? String(e.parameter.page).toLowerCase()
+    : 'dashboard1';
+
   const templateFile = page === 'dashboard3' ? 'Dashboard3Window' : 'Dashboard1Window';
   const template = HtmlService.createTemplateFromFile(templateFile);
-  // Provide the URL of Dashboard1 WebApp in case templates need it. It may be undefined if not configured.
-  try {
-    template.dashboard1Url = dashboard1GetWebAppUrl_();
-  } catch (err) {
-    template.dashboard1Url = '';
-  }
-  // activePage is used only by Dashboard1Window to highlight the tab; safe for other templates.
+
+  const dashboard1Url = dashboard1GetWebAppUrl_();
+
   template.activePage = dashboardHtmlResolvePage_(e);
+  template.dashboard1Url = dashboard1Url;
+  template.dashboard2Url = '';
+  template.dashboard3Url = dashboard1Url
+    ? dashboard1Url + (dashboard1Url.indexOf('?') === -1 ? '?page=dashboard3' : '&page=dashboard3')
+    : '';
+
   return template
     .evaluate()
     .setTitle('Dashboards')
@@ -208,86 +211,77 @@ function dashboardHtmlParseTrendSeries_(value, expectedLength) {
     return new Array(expectedLength).fill(0);
   }
 
-  const raw = String(value).split(',');
-  const result = raw.slice(0, expectedLength).map(function(item) {
-    const num = Number(item);
+  const parts = String(value).split(',').map(function(v) {
+    const num = Number(v);
     return isNaN(num) ? 0 : num;
   });
 
-  while (result.length < expectedLength) {
-    result.push(0);
+  while (parts.length < expectedLength) {
+    parts.unshift(0);
   }
 
-  return result;
-}
-
-function dashboardHtmlBuildFilterValues_(rows) {
-  function uniqueSorted(key) {
-    const set = {};
-    rows.forEach(function(row) {
-      const value = String(row[key] || '').trim();
-      if (value) set[value] = true;
-    });
-    return Object.keys(set).sort(function(a, b) {
-      return a.localeCompare(b, 'ru');
-    });
-  }
-
-  return {
-    cat: uniqueSorted('cat'),
-    brandinfo: uniqueSorted('brandinfo'),
-    tg1: uniqueSorted('tg1'),
-    tg2: uniqueSorted('tg2'),
-    tg3: uniqueSorted('tg3')
-  };
-}
-
-function dashboardHtmlBuildSummaryByMode_(rows, mode) {
-  const is30 = String(mode) === '30';
-
-  const summary = {
-    totalSku: rows.length,
-    turnoverSku: 0,
-    sumstock: 0,
-    totalDayorders: 0,
-    turnover: null,
-    lowStockSku: 0
-  };
-
-  rows.forEach(function(row) {
-    const dayorders = is30 ? row.dayorders30 : row.dayorders14;
-    const zapas = is30 ? row.zapas30 : row.zapas14;
-
-    summary.sumstock += dashboardHtmlToNumber_(row.sumstock);
-
-    if (dayorders !== null && dayorders > 0) {
-      summary.totalDayorders += dayorders;
-      summary.turnoverSku += 1;
-    }
-
-    if (zapas !== null && zapas < 30) {
-      summary.lowStockSku += 1;
-    }
-  });
-
-  summary.turnover = summary.totalDayorders > 0
-    ? summary.sumstock / summary.totalDayorders
-    : null;
-
-  return summary;
+  return parts.slice(-expectedLength);
 }
 
 function dashboardHtmlToNumber_(value) {
+  if (value === '' || value === null || value === undefined) {
+    return 0;
+  }
   const num = Number(value);
   return isNaN(num) ? 0 : num;
 }
 
 function dashboardHtmlToNumberOrNull_(value) {
-  if (value === '' || value === null || value === undefined) return null;
+  if (value === '' || value === null || value === undefined) {
+    return null;
+  }
   const num = Number(value);
   return isNaN(num) ? null : num;
 }
 
 function dashboardHtmlCompare_(a, b) {
   return String(a || '').localeCompare(String(b || ''), 'ru');
+}
+
+function dashboardHtmlBuildFilterValues_(rows) {
+  function uniqueSorted(values) {
+    return Array.from(new Set(values.filter(function(v) { return v !== '' && v !== null && v !== undefined; })))
+      .sort(function(a, b) { return String(a).localeCompare(String(b), 'ru'); });
+  }
+
+  return {
+    cat: uniqueSorted(rows.map(function(r) { return r.cat; })),
+    brandinfo: uniqueSorted(rows.map(function(r) { return r.brandinfo; })),
+    tg1: uniqueSorted(rows.map(function(r) { return r.tg1; })),
+    tg2: uniqueSorted(rows.map(function(r) { return r.tg2; })),
+    tg3: uniqueSorted(rows.map(function(r) { return r.tg3; }))
+  };
+}
+
+function dashboardHtmlBuildSummaryByMode_(rows, mode) {
+  const is30 = String(mode) === '30';
+  const fields = is30
+    ? { orders: 'orderssum30', dayorders: 'dayorders30', zapas: 'zapas30' }
+    : { orders: 'orderssum14', dayorders: 'dayorders14', zapas: 'zapas14' };
+
+  return rows.reduce(function(acc, row) {
+    acc.sumstock += row.sumstock || 0;
+    acc.totalDayorders += row[fields.dayorders] || 0;
+    acc.totalOrders += row[fields.orders] || 0;
+    acc.totalSku += 1;
+    if (row[fields.zapas] !== null && row[fields.zapas] !== undefined) {
+      acc.turnoverSku += 1;
+    }
+    if ((row[fields.zapas] || 0) < 30) {
+      acc.lowStockSku += 1;
+    }
+    return acc;
+  }, {
+    sumstock: 0,
+    totalDayorders: 0,
+    totalOrders: 0,
+    totalSku: 0,
+    turnoverSku: 0,
+    lowStockSku: 0
+  });
 }

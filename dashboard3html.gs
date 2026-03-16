@@ -1,112 +1,78 @@
-/**
- * Возвращает данные для дашборда 3 в формате, удобном для HTML/web app.
- *
- * Источник данных — лист report2, который генерируется скриптом build_report2.
- * Каждая строка в report2 должна содержать, как минимум, следующие колонки:
- *   date, nmid, artwb, nom, brandinfo, fboStock, fbsStock, sumStock,
- *   ordersCount, salesCount, salesSum, sppSum, margin, views, clicks,
- *   to_cart, advOrders, advPrice, advCpc, drr.
- *
- * Функция возвращает объект вида:
- *   {
- *     generatedAt: 'DD.MM.YYYY HH:mm:ss',
- *     items: [ { nmid, artwb, name, brand } ],
- *     rows: [ { date, nmid, fboStock, fbsStock, sumStock, ordersCount,
- *               salesCount, salesSum, sppSum, margin, views, clicks,
- *               to_cart, advOrders, advPrice, advCpc, drr } ]
- *   }
- */
 function getDashboard3HtmlData() {
-  var ss = SpreadsheetApp.getActiveSpreadsheet();
-  var sheet = getRequiredSheet_('report2');
+  const sheet = getRequiredSheet_('report2');
+  const data = dashboardHtmlGetSheetDataWithHeaders_(sheet);
 
-  var data = dashboardHtmlGetSheetDataWithHeaders_(sheet);
   if (!data.headers.length) {
     throw new Error('Лист report2 пустой или не содержит заголовков.');
   }
 
-  var headerMap = dashboardHtmlBuildHeaderMap_(data.headers);
-
-  // Список обязательных колонок для report2. Если какой‑то нет, бросаем ошибку.
-  var required = [
+  const map = dashboardHtmlBuildHeaderMap_(data.headers);
+  const required = [
     'date',
     'nmid',
-    'artwb',
-    'nom',
-    'brandinfo',
-    'fboStock',
-    'fbsStock',
-    'sumStock',
-    'ordersCount',
-    'salesCount',
-    'salesSum',
-    'sppSum',
-    'margin',
+    'stock_fbo',
+    'stock_fbs',
+    'sumstockfbofbs',
+    'orders_count',
+    'sales_count',
+    'sales_amount',
+    'spp_sum',
+    'marga',
     'views',
     'clicks',
     'to_cart',
-    'advOrders',
-    'advPrice',
-    'advCpc',
+    'adv_orders',
+    'adv_price',
+    'adv_cost',
     'drr'
   ];
 
   required.forEach(function(name) {
-    if (headerMap[name] === undefined) {
+    if (map[name] === undefined) {
       throw new Error('В report2 не найден обязательный столбец: ' + name);
     }
   });
 
-  var rows = [];
-  var itemsMap = {};
+  function toNum(value) {
+    if (value === '' || value === null || value === undefined) return 0;
+    const num = Number(value);
+    return isNaN(num) ? 0 : num;
+  }
 
-  data.rows.forEach(function(row) {
-    var nmid = row[headerMap.nmid];
-    if (!nmid) {
-      return;
-    }
-
-    // Собираем метаданные товара (номенклатуры) один раз.
-    if (!itemsMap[nmid]) {
+  const itemsMap = {};
+  const rows = data.rows.map(function(row) {
+    const nmid = String(row[map.nmid] || '').trim();
+    if (nmid && !itemsMap[nmid]) {
       itemsMap[nmid] = {
         nmid: nmid,
-        artwb: row[headerMap.artwb],
-        name: row[headerMap.nom],
-        brand: row[headerMap.brandinfo]
+        label: nmid
       };
     }
 
-    // Преобразует значение в число. Пустые и нечисловые — в 0.
-    function toNumber(value) {
-      if (value === '' || value === null || value === undefined) return 0;
-      var num = Number(value);
-      return isNaN(num) ? 0 : num;
-    }
-
-    rows.push({
-      date: row[headerMap.date],
+    return {
+      date: row[map.date],
       nmid: nmid,
-      fboStock: toNumber(row[headerMap.fboStock]),
-      fbsStock: toNumber(row[headerMap.fbsStock]),
-      sumStock: toNumber(row[headerMap.sumStock]),
-      ordersCount: toNumber(row[headerMap.ordersCount]),
-      salesCount: toNumber(row[headerMap.salesCount]),
-      salesSum: toNumber(row[headerMap.salesSum]),
-      sppSum: toNumber(row[headerMap.sppSum]),
-      margin: toNumber(row[headerMap.margin]),
-      views: toNumber(row[headerMap.views]),
-      clicks: toNumber(row[headerMap.clicks]),
-      to_cart: toNumber(row[headerMap.to_cart]),
-      advOrders: toNumber(row[headerMap.advOrders]),
-      advPrice: toNumber(row[headerMap.advPrice]),
-      advCpc: toNumber(row[headerMap.advCpc]),
-      drr: toNumber(row[headerMap.drr])
-    });
+      stock_fbo: toNum(row[map.stock_fbo]),
+      stock_fbs: toNum(row[map.stock_fbs]),
+      sumstockfbofbs: toNum(row[map.sumstockfbofbs]),
+      orders_count: toNum(row[map.orders_count]),
+      sales_count: toNum(row[map.sales_count]),
+      sales_amount: toNum(row[map.sales_amount]),
+      spp_sum: toNum(row[map.spp_sum]),
+      marga: toNum(row[map.marga]),
+      views: toNum(row[map.views]),
+      clicks: toNum(row[map.clicks]),
+      to_cart: toNum(row[map.to_cart]),
+      adv_orders: toNum(row[map.adv_orders]),
+      adv_price: toNum(row[map.adv_price]),
+      adv_cost: toNum(row[map.adv_cost]),
+      drr: toNum(row[map.drr])
+    };
   });
 
   return {
     generatedAt: Utilities.formatDate(new Date(), Session.getScriptTimeZone(), 'dd.MM.yyyy HH:mm:ss'),
-    items: Object.keys(itemsMap).map(function(key) { return itemsMap[key]; }),
+    items: Object.keys(itemsMap).sort().map(function(key) { return itemsMap[key]; }),
     rows: rows
   };
 }

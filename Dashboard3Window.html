@@ -5,313 +5,236 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <style>
-      :root {
-        --bg: #f6f8fb;
-        --card: #ffffff;
-        --line: #d9e2ec;
-        --text: #1f2937;
-        --blue: #1f4e78;
-        --orange: #ff7f0e;
-        --green: #2ca02c;
-        --purple: #9467bd;
-      }
-      * {
-        box-sizing: border-box;
-      }
-      html, body {
-        margin: 0;
-        padding: 0;
-        width: 100%;
-        height: 100%;
-        font-family: Arial, sans-serif;
-        background: var(--bg);
-        color: var(--text);
-      }
-      .app {
-        height: 100vh;
-        display: flex;
-        flex-direction: column;
-        padding: 12px;
-        gap: 12px;
-      }
-      .topbar {
-        background: var(--blue);
-        color: #fff;
-        border-radius: 12px;
-        padding: 14px 16px;
-        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-      }
-      .topbar h1 {
-        margin: 0 0 4px;
-        font-size: 20px;
-      }
-      .topbar p {
-        margin: 0;
-        font-size: 12px;
-        opacity: 0.9;
-      }
-      .controls {
-        margin-top: 8px;
-        display: flex;
-        flex-wrap: wrap;
-        gap: 8px;
-      }
-      .controls select,
-      .controls input,
-      .controls button {
-        padding: 6px 8px;
-        border-radius: 6px;
-        border: 1px solid var(--line);
-        font-size: 13px;
-      }
-      .controls button {
-        background: var(--green);
-        color: #fff;
-        border: none;
-        cursor: pointer;
-      }
-      .controls button:hover {
-        background: var(--orange);
-      }
-      .content {
-        flex: 1 1 auto;
-        overflow-y: auto;
-        display: flex;
-        flex-direction: column;
-        gap: 12px;
-      }
-      canvas {
-        background: var(--card);
-        border: 1px solid var(--line);
-        border-radius: 8px;
-        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
-        padding: 8px;
-        height: 240px;
-      }
+      :root { --bg:#f6f8fb; --card:#fff; --line:#d9e2ec; --text:#1f2937; --blue:#1f4e78; }
+      * { box-sizing:border-box; }
+      html, body { margin:0; padding:0; width:100%; height:100%; font-family:Arial,sans-serif; background:var(--bg); color:var(--text); }
+      .app { min-height:100vh; display:flex; flex-direction:column; gap:12px; padding:12px; }
+      .topbar { background:linear-gradient(135deg,#1f4e78 0%,#2f6b9a 100%); color:#fff; border-radius:16px; padding:16px 18px; }
+      .topbar h1 { margin:0 0 6px; font-size:22px; }
+      .topbar p { margin:0; opacity:.92; font-size:13px; }
+      .nav-tabs { display:flex; gap:10px; flex-wrap:wrap; margin-top:12px; }
+      .nav-tab { background:#fff; color:#1f4e78; text-decoration:none; border:1px solid #d9e2ec; border-radius:999px; padding:10px 14px; font-size:13px; font-weight:700; }
+      .nav-tab.active { background:#1f4e78; color:#fff; border-color:#1f4e78; }
+      .controls { display:flex; flex-wrap:wrap; gap:8px; align-items:end; background:var(--card); border:1px solid var(--line); border-radius:16px; padding:12px; }
+      .field { display:flex; flex-direction:column; gap:4px; }
+      .field label { font-size:12px; color:#667085; }
+      select, input, button { padding:8px 10px; border-radius:10px; border:1px solid var(--line); font-size:13px; }
+      button { cursor:pointer; background:#1f4e78; color:#fff; border:none; font-weight:700; }
+      .charts { display:grid; grid-template-columns:1fr; gap:12px; }
+      .chart-card { background:var(--card); border:1px solid var(--line); border-radius:16px; padding:12px; }
+      .chart-card h3 { margin:0 0 8px; font-size:15px; }
+      canvas { width:100% !important; height:280px !important; }
+      .meta { font-size:12px; color:#667085; }
     </style>
   </head>
   <body>
     <div class="app">
       <div class="topbar">
-        <h1>Dashboard 3</h1>
-        <p>История остатков, продаж, цен, воронки и ДРР за год</p>
-        <div class="controls">
-          <select id="itemSelect"></select>
-          <label>С:
-            <input type="date" id="startDate">
-          </label>
-          <label>По:
-            <input type="date" id="endDate">
-          </label>
-          <select id="granularity">
-            <option value="day">День</option>
-            <option value="week">Неделя</option>
-            <option value="month">Месяц</option>
-          </select>
-          <button id="updateBtn">Обновить</button>
+        <h1>Dashboard3</h1>
+        <p>История остатков, заказов, продаж, воронки и ДРР за 365 дней.</p>
+        <div class="nav-tabs">
+          <a class="nav-tab" href="?page=dashboard1">Dashboard1</a>
+          <a class="nav-tab" href="?page=dashboard2">Dashboard2</a>
+          <a class="nav-tab active" href="?page=dashboard3">Dashboard3</a>
         </div>
       </div>
-      <div class="content">
-        <canvas id="stockChart"></canvas>
-        <canvas id="salesChart"></canvas>
-        <canvas id="priceChart"></canvas>
-        <canvas id="funnelChart"></canvas>
-        <canvas id="drrChart"></canvas>
+
+      <div class="controls">
+        <div class="field">
+          <label>Номенклатура (nmid)</label>
+          <select id="itemSelect"></select>
+        </div>
+        <div class="field">
+          <label>Дата отчёта</label>
+          <input id="reportDate" type="date">
+        </div>
+        <div class="field">
+          <label>Агрегация</label>
+          <select id="granularity">
+            <option value="day">По дням</option>
+            <option value="week">По неделям</option>
+            <option value="month">По месяцам</option>
+          </select>
+        </div>
+        <div class="field">
+          <button id="applyBtn">Обновить</button>
+        </div>
+        <div class="meta" id="metaText"></div>
+      </div>
+
+      <div class="charts">
+        <div class="chart-card"><h3>Остатки FBO / FBS / Сумма</h3><canvas id="stockChart"></canvas></div>
+        <div class="chart-card"><h3>Заказы и продажи</h3><canvas id="salesChart"></canvas></div>
+        <div class="chart-card"><h3>Цена после СПП и маржа</h3><canvas id="priceChart"></canvas></div>
+        <div class="chart-card"><h3>Воронка</h3><canvas id="funnelChart"></canvas></div>
+        <div class="chart-card"><h3>ДРР</h3><canvas id="drrChart"></canvas></div>
       </div>
     </div>
+
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script>
-      let dashboardData;
+      let rawData = null;
       const charts = {};
+
+      document.addEventListener('DOMContentLoaded', function() {
+        google.script.run
+          .withSuccessHandler(initDashboard)
+          .withFailureHandler(function(err) {
+            document.getElementById('metaText').textContent = 'Ошибка загрузки данных: ' + (err && err.message ? err.message : err);
+          })
+          .getDashboard3HtmlData();
+      });
+
       function initDashboard(data) {
-        dashboardData = data;
-        const itemSelect = document.getElementById('itemSelect');
-        itemSelect.innerHTML = '';
-        data.items.forEach(function(item) {
-          const opt = document.createElement('option');
-          opt.value = item.nmid;
-          opt.textContent = (item.name || item.artwb || item.nmid) +
-            (item.artwb ? ' (' + item.artwb + ')' : '');
-          itemSelect.appendChild(opt);
-        });
-        // default dates: last 365 days
-        const end = new Date();
-        const start = new Date();
-        start.setDate(end.getDate() - 364);
-        document.getElementById('startDate').value = formatDateInput(start);
-        document.getElementById('endDate').value = formatDateInput(end);
-        document.getElementById('updateBtn').addEventListener('click', updateCharts);
-        updateCharts();
+        rawData = data;
+        document.getElementById('metaText').textContent = 'Обновлено: ' + data.generatedAt;
+
+        const select = document.getElementById('itemSelect');
+        select.innerHTML = data.items.map(function(item) {
+          return '<option value="' + escapeHtml(item.nmid) + '">' + escapeHtml(item.label) + '</option>';
+        }).join('');
+
+        const reportDate = document.getElementById('reportDate');
+        reportDate.value = toInputDate(new Date());
+
+        document.getElementById('applyBtn').addEventListener('click', renderAll);
+        renderAll();
       }
-      function formatDateInput(d) {
-        const month = String(d.getMonth() + 1).padStart(2, '0');
-        const day = String(d.getDate()).padStart(2, '0');
-        return d.getFullYear() + '-' + month + '-' + day;
-      }
-      function groupBy(array, keyFunc) {
-        const map = {};
-        array.forEach(function(item) {
-          const key = keyFunc(item);
-          if (!map[key]) map[key] = [];
-          map[key].push(item);
-        });
-        return map;
-      }
-      function updateCharts() {
+
+      function renderAll() {
+        if (!rawData) return;
         const nmid = document.getElementById('itemSelect').value;
-        if (!nmid) return;
-        const startDate = new Date(document.getElementById('startDate').value);
-        const endDate = new Date(document.getElementById('endDate').value);
+        const reportDate = new Date(document.getElementById('reportDate').value || new Date());
         const granularity = document.getElementById('granularity').value;
-        const rows = dashboardData.rows.filter(function(r) {
-          const d = new Date(r.date);
-          return r.nmid === nmid && d >= startDate && d <= endDate;
-        });
-        const grouped = groupBy(rows, function(row) {
+        const startDate = new Date(reportDate);
+        startDate.setDate(startDate.getDate() - 364);
+
+        const rows = rawData.rows.filter(function(row) {
           const d = new Date(row.date);
-          if (granularity === 'month') {
-            return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0');
-          } else if (granularity === 'week') {
-            const temp = new Date(d);
-            const day = temp.getDay();
-            const diff = temp.getDate() - day + (day === 0 ? -6 : 1);
-            const monday = new Date(temp.setDate(diff));
-            return monday.getFullYear() + '-' +
-              String(monday.getMonth() + 1).padStart(2, '0') + '-' +
-              String(monday.getDate()).padStart(2, '0');
-          }
-          return row.date;
+          return row.nmid === nmid && d >= startDate && d <= reportDate;
         });
-        const labels = [];
-        const stocksFbo = [];
-        const stocksFbs = [];
-        const stocksSum = [];
-        const ordersCount = [];
-        const salesCount = [];
-        const salesSum = [];
-        const margins = [];
-        const priceAfterSpp = [];
-        const views = [];
-        const clicks = [];
-        const carts = [];
-        const advOrders = [];
-        const drrs = [];
-        Object.keys(grouped).sort().forEach(function(key) {
-          const groupRows = grouped[key];
-          let sumFbo = 0, sumFbs = 0, sumSum = 0;
-          let sumOrders = 0, sumSales = 0, sumSalesSum = 0;
-          let sumMargin = 0, sumSpp = 0;
-          let sumViews = 0, sumClicks = 0, sumCarts = 0, sumAdvOrders = 0;
-          let sumAdvPrice = 0, sumAdvCpc = 0;
-          groupRows.forEach(function(r) {
-            sumFbo += r.fboStock;
-            sumFbs += r.fbsStock;
-            sumSum += r.sumStock;
-            sumOrders += r.ordersCount;
-            sumSales += r.salesCount;
-            sumSalesSum += r.salesSum;
-            sumMargin += r.margin;
-            sumSpp += r.sppSum;
-            sumViews += r.views;
-            sumClicks += r.clicks;
-            sumCarts += r.to_cart;
-            sumAdvOrders += r.advOrders;
-            sumAdvPrice += r.advPrice;
-            sumAdvCpc += r.advCpc;
-          });
-          labels.push(key);
-          stocksFbo.push(sumFbo);
-          stocksFbs.push(sumFbs);
-          stocksSum.push(sumSum);
-          ordersCount.push(sumOrders);
-          salesCount.push(sumSales);
-          salesSum.push(sumSalesSum);
-          margins.push(sumMargin);
-          priceAfterSpp.push(sumSales > 0 ? sumSalesSum / sumSales : 0);
-          views.push(sumViews);
-          clicks.push(sumClicks);
-          carts.push(sumCarts);
-          advOrders.push(sumAdvOrders);
-          const advSpend = sumAdvPrice + sumAdvCpc;
-          drrs.push(sumSalesSum > 0 ? advSpend / sumSalesSum : 0);
-        });
-        createOrUpdateChart('stockChart', labels, [
-          { label: 'FBO', data: stocksFbo, color: '#1f77b4' },
-          { label: 'FBS', data: stocksFbs, color: '#ff7f0e' },
-          { label: 'Sum', data: stocksSum, color: '#2ca02c' }
-        ], 'Остатки');
-        createOrUpdateChart('salesChart', labels, [
-          { label: 'Orders', data: ordersCount, color: '#9467bd' },
-          { label: 'Sales (count)', data: salesCount, color: '#8c564b' },
-          { label: 'Sales (sum)', data: salesSum, color: '#e377c2' }
-        ], 'Заказы и продажи');
-        createOrUpdateChart('priceChart', labels, [
-          { label: 'Сумма продаж', data: salesSum, color: '#17becf' },
-          { label: 'Маржа', data: margins, color: '#bcbd22' },
-          { label: 'Цена после СПП', data: priceAfterSpp, color: '#d62728' }
-        ], 'Цены и маржа');
-        createOrUpdateChart('funnelChart', labels, [
-          { label: 'Показы', data: views, color: '#1f77b4' },
-          { label: 'Клики', data: clicks, color: '#ff7f0e' },
-          { label: 'Корзина', data: carts, color: '#2ca02c' },
-          { label: 'Заказы', data: advOrders, color: '#d62728' }
-        ], 'Воронка');
-        createOrUpdateChart('drrChart', labels, [
-          { label: 'DRR', data: drrs, color: '#9467bd' }
-        ], 'ДРР');
+
+        const grouped = groupRows(rows, granularity);
+        const labels = grouped.map(function(x) { return x.key; });
+
+        updateChart('stockChart', labels, [
+          { label: 'FBO', data: grouped.map(function(x) { return x.stock_fbo; }) },
+          { label: 'FBS', data: grouped.map(function(x) { return x.stock_fbs; }) },
+          { label: 'Сумма', data: grouped.map(function(x) { return x.sumstockfbofbs; }) }
+        ]);
+
+        updateChart('salesChart', labels, [
+          { label: 'Заказы', data: grouped.map(function(x) { return x.orders_count; }) },
+          { label: 'Продажи, шт', data: grouped.map(function(x) { return x.sales_count; }) },
+          { label: 'Продажи, сумма', data: grouped.map(function(x) { return x.sales_amount; }) }
+        ]);
+
+        updateChart('priceChart', labels, [
+          { label: 'Цена после СПП', data: grouped.map(function(x) { return x.sales_count ? x.sales_amount / x.sales_count : 0; }) },
+          { label: 'СПП, сумма', data: grouped.map(function(x) { return x.spp_sum; }) },
+          { label: 'Маржа', data: grouped.map(function(x) { return x.marga; }) }
+        ]);
+
+        updateChart('funnelChart', labels, [
+          { label: 'Показы', data: grouped.map(function(x) { return x.views; }) },
+          { label: 'Клики', data: grouped.map(function(x) { return x.clicks; }) },
+          { label: 'В корзину', data: grouped.map(function(x) { return x.to_cart; }) },
+          { label: 'Заказы', data: grouped.map(function(x) { return x.adv_orders; }) }
+        ]);
+
+        updateChart('drrChart', labels, [
+          { label: 'ДРР', data: grouped.map(function(x) { return x.drr; }) },
+          { label: 'Расход рекламы', data: grouped.map(function(x) { return x.adv_cost; }) }
+        ]);
       }
-      function createOrUpdateChart(id, labels, series, title) {
-        const ctx = document.getElementById(id).getContext('2d');
-        if (charts[id]) {
-          charts[id].data.labels = labels;
-          charts[id].data.datasets.forEach(function(ds, idx) {
-            ds.data = series[idx].data;
-          });
-          charts[id].update();
-        } else {
-          charts[id] = new Chart(ctx, {
-            type: 'line',
-            data: {
-              labels: labels,
-              datasets: series.map(function(s) {
-                return {
-                  label: s.label,
-                  data: s.data,
-                  borderColor: s.color,
-                  backgroundColor: 'rgba(0,0,0,0)',
-                  tension: 0.1
-                };
-              })
-            },
-            options: {
-              responsive: true,
-              maintainAspectRatio: false,
-              plugins: {
-                title: {
-                  display: true,
-                  text: title
-                },
-                legend: {
-                  position: 'top'
-                }
-              },
-              scales: {
-                x: {
-                  ticks: {
-                    maxRotation: 60,
-                    minRotation: 45
-                  }
-                },
-                y: {
-                  beginAtZero: true
-                }
-              }
+
+      function groupRows(rows, granularity) {
+        const map = {};
+        rows.forEach(function(row) {
+          const d = new Date(row.date);
+          const key = granularity === 'month'
+            ? d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0')
+            : granularity === 'week'
+              ? getWeekKey(d)
+              : row.date;
+
+          if (!map[key]) {
+            map[key] = { key:key, stock_fbo:0, stock_fbs:0, sumstockfbofbs:0, orders_count:0, sales_count:0, sales_amount:0, spp_sum:0, marga:0, views:0, clicks:0, to_cart:0, adv_orders:0, adv_price:0, adv_cost:0, drr:0 };
+          }
+
+          Object.keys(map[key]).forEach(function(field) {
+            if (field !== 'key' && row[field] !== undefined) {
+              map[key][field] += Number(row[field]) || 0;
             }
           });
-        }
+        });
+
+        return Object.keys(map).sort().map(function(key) {
+          const item = map[key];
+          item.drr = item.sales_amount ? item.adv_cost / item.sales_amount : 0;
+          return item;
+        });
       }
-      // Инициализация: получаем данные из Apps Script и строим дашборд.
-      google.script.run.withSuccessHandler(initDashboard).getDashboard3HtmlData();
+
+      function updateChart(id, labels, datasets) {
+        const ctx = document.getElementById(id).getContext('2d');
+        const colors = ['#1f77b4', '#ff7f0e', '#2ca02c', '#d62728', '#9467bd'];
+        const prepared = datasets.map(function(ds, idx) {
+          return {
+            label: ds.label,
+            data: ds.data,
+            borderColor: colors[idx % colors.length],
+            backgroundColor: 'transparent',
+            borderWidth: 2,
+            tension: 0.2
+          };
+        });
+
+        if (charts[id]) {
+          charts[id].data.labels = labels;
+          charts[id].data.datasets = prepared;
+          charts[id].update();
+          return;
+        }
+
+        charts[id] = new Chart(ctx, {
+          type: 'line',
+          data: {
+            labels: labels,
+            datasets: prepared
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+              legend: { position: 'top' }
+            },
+            scales: {
+              y: { beginAtZero: true }
+            }
+          }
+        });
+      }
+
+      function getWeekKey(date) {
+        const d = new Date(date);
+        const day = d.getDay() || 7;
+        d.setDate(d.getDate() - day + 1);
+        return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
+      }
+
+      function toInputDate(date) {
+        return date.getFullYear() + '-' + String(date.getMonth() + 1).padStart(2, '0') + '-' + String(date.getDate()).padStart(2, '0');
+      }
+
+      function escapeHtml(value) {
+        return String(value == null ? '' : value)
+          .replaceAll('&', '&amp;')
+          .replaceAll('<', '&lt;')
+          .replaceAll('>', '&gt;')
+          .replaceAll('"', '&quot;')
+          .replaceAll("'", '&#39;');
+      }
     </script>
   </body>
 </html>
