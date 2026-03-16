@@ -4,6 +4,12 @@ function doGet(e) {
   // Choose the HTML file to load: Dashboard3 uses its own template; all others use Dashboard1Window.
   const templateFile = page === 'dashboard3' ? 'Dashboard3Window' : 'Dashboard1Window';
   const template = HtmlService.createTemplateFromFile(templateFile);
+  // Provide the URL of Dashboard1 WebApp in case templates need it. It may be undefined if not configured.
+  try {
+    template.dashboard1Url = dashboard1GetWebAppUrl_();
+  } catch (err) {
+    template.dashboard1Url = '';
+  }
   // activePage is used only by Dashboard1Window to highlight the tab; safe for other templates.
   template.activePage = dashboardHtmlResolvePage_(e);
   return template
