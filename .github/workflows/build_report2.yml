@@ -11,7 +11,6 @@ on:
   schedule:
     # Run every day at 00:00 UTC. Adjust the cron if you need a
     # different time; the original pipeline used 05:00 Yekaterinburg.
-    - cron: '0 0 * * *'
   workflow_dispatch: {}
 
 jobs:
